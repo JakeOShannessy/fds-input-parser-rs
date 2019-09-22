@@ -9,7 +9,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "b8:13:c3:67:7d:35:f1:c1:6c:e4:9d:d6:48:33:4a:34"
+            - "4f:90:c2:99:58:d5:29:d4:20:b7:32:eb:92:6b:9e:75"
       - run:
           name: Install git
           command: yum install -y git
@@ -54,7 +54,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "b8:13:c3:67:7d:35:f1:c1:6c:e4:9d:d6:48:33:4a:34"
+            - "4f:90:c2:99:58:d5:29:d4:20:b7:32:eb:92:6b:9e:75"
       - run:
           name: Install git
           command: yum install -y git
