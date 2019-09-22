@@ -1,14 +1,4 @@
-A verification test case for two-region Neumann problem of phase change. 
 
-The analytical solutions for the phase interface location and temperature are
-
-x_f(t) = lambda * 2 * sqrt(alpha t)
-
-(T_f - T)/(T_f - T_0) = 1 - erf(x/2/sqrt(alpha t))/erf(lambda)
-
-where lambda = x_f /2 sqrt(alpha t) is the root of the (very complicated)
-trancendential equation. With the given material properties, 
-lambda = 0.189.
 
 &HEAD	CHID = 	 'pcm_slab',	TITLE = 'Phace change test case SVN $Revision$'/
 
