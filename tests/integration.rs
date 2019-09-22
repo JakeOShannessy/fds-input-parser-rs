@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod integration {
-    use fds_input_parser_rs::*;
+    use fds_input_parser::*;
     #[test]
     fn parse_file_room_fire() {
         let nml = parse_fds_input(include_bytes!("room_fire.fds"));

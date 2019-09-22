@@ -1,4 +1,4 @@
-use namelist_rs::*;
+use namelist::*;
 use std::collections::HashMap;
 pub fn init_spec() -> NamelistSpec {
     let mut namelist_spec = HashMap::new();
