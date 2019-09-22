@@ -38,7 +38,7 @@ jobs:
           name: Build
           command: |
             echo "[net]" >> ~/.cargo/config
-            echo "[git-fetch-with-cli = true]" >> ~/.cargo/config
+            echo "git-fetch-with-cli = true" >> ~/.cargo/config
             yum install -y gcc make
             ~/.cargo/bin/rustup default stable
             ~/.cargo/bin/cargo build --release
