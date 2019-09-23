@@ -82,7 +82,7 @@ jobs:
       - run:
           name: Test
           command: |
-            cho "[net]" > ~/.cargo/config
+            echo "[net]" > ~/.cargo/config
             echo "git-fetch-with-cli = true" >> ~/.cargo/config
             yum install -y gcc make
             ~/.cargo/bin/rustup default stable
