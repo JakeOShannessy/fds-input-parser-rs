@@ -13,6 +13,8 @@
 // use namelist::Namelist;
 // use namelist::NamelistFile;
 use namelist::*;
+use crate::xb::*;
+use crate::xb::HasXB;
 
 /// The Haskell data type representation of an FDS input script. The first items
 /// (such as head and time) are single occurrence items. As any of these items
@@ -22,29 +24,29 @@ use namelist::*;
 /// forward compatibility.
 #[derive(Clone, Debug)]
 pub struct FDSFile {
-    head: Option<Head>,
-    time: Option<Time>,
-    dump: Option<Dump>,
-    misc: Option<Misc>,
-    meshes: Vec<Mesh>,
-    reacs: Vec<Reac>,
-    devcs: Vec<Devc>,
-    matls: Vec<Matl>,
-    surfs: Vec<Surf>,
-    obsts: Vec<Obst>,
-    holes: Vec<Hole>,
-    hvacs: Vec<Hvac>,
-    vents: Vec<Vent>,
-    bndfs: Vec<Bndf>,
-    isofs: Vec<Isof>,
-    slcfs: Vec<Slcf>,
-    ramps: Vec<Ramp>,
-    props: Vec<Prop>,
-    parts: Vec<Part>,
-    trnxs: Vec<Trnx>,
-    trnys: Vec<Trny>,
-    trnzs: Vec<Trnz>,
-    unknown_namelists: Vec<Namelist>,
+    pub head: Option<Head>,
+    pub time: Option<Time>,
+    pub dump: Option<Dump>,
+    pub misc: Option<Misc>,
+    pub meshes: Vec<Mesh>,
+    pub reacs: Vec<Reac>,
+    pub devcs: Vec<Devc>,
+    pub matls: Vec<Matl>,
+    pub surfs: Vec<Surf>,
+    pub obsts: Vec<Obst>,
+    pub holes: Vec<Hole>,
+    pub hvacs: Vec<Hvac>,
+    pub vents: Vec<Vent>,
+    pub bndfs: Vec<Bndf>,
+    pub isofs: Vec<Isof>,
+    pub slcfs: Vec<Slcf>,
+    pub ramps: Vec<Ramp>,
+    pub props: Vec<Prop>,
+    pub parts: Vec<Part>,
+    pub trnxs: Vec<Trnx>,
+    pub trnys: Vec<Trny>,
+    pub trnzs: Vec<Trnz>,
+    pub unknown_namelists: Vec<Namelist>,
 }
 
 impl Default for FDSFile {
@@ -148,60 +150,60 @@ pub struct Csvf {
 
 #[derive(Clone, Debug)]
 pub struct Devc {
-    bypass_flowrate: f64,
-    conversion_addend: f64,
-    conversion_factor: f64,
-    coord_factor: f64,
-    ctrl_id: Option<String>,
-    delay: f64,
-    depth: f64,
-    devc_id: Option<String>,
-    dry: bool,
-    duct_id: Option<String>,
-    evacuation: bool,
-    flowrate: f64,
-    fyi: Option<String>,
-    hide_coordinates: bool,
-    id: Option<String>,
-    initial_state: bool,
-    init_id: Option<String>,
-    ior: Option<i64>,
-    latch: bool,
-    matl_id: Option<String>,
-    node_id: Vec<String>,
-    no_update_devc_id: Option<String>,
-    no_update_ctrl_id: Option<String>,
-    orientation: XYZ,
-    orientation_number: i64,
-    output: bool,
-    part_id: Option<String>,
-    pipe_index: i64,
-    points: i64,
-    prop_id: Option<String>,
-    quantity: Option<String>,
-    quantity2: Option<String>,
-    quantity_range: (f64, f64),
-    r_id: Option<String>,
-    reac_id: Option<String>,
-    relative: bool,
-    rotation: f64,
-    setpoint: Option<f64>,
-    smoothing_factor: f64,
-    spec_id: Option<String>,
-    statistics: Option<String>,
-    statistics_start: f64,
-    surf_id: Option<String>,
-    time_averaged: bool,
-    time_history: bool,
-    trip_direction: i64,
-    units: Option<String>,
-    velo_index: i64,
-    xb: Option<XB>,
-    xyz: Option<XYZ>,
-    x_id: Option<String>,
-    y_id: Option<String>,
-    z_id: Option<String>,
-    xyz_units: String,
+    // bypass_flowrate: f64,
+    // conversion_addend: f64,
+    // conversion_factor: f64,
+    // coord_factor: f64,
+    // ctrl_id: Option<String>,
+    // delay: f64,
+    // depth: f64,
+    // devc_id: Option<String>,
+    // dry: bool,
+    // duct_id: Option<String>,
+    // evacuation: bool,
+    // flowrate: f64,
+    // fyi: Option<String>,
+    // hide_coordinates: bool,
+    // id: Option<String>,
+    // initial_state: bool,
+    // init_id: Option<String>,
+    // ior: Option<i64>,
+    // latch: bool,
+    // matl_id: Option<String>,
+    // node_id: Vec<String>,
+    // no_update_devc_id: Option<String>,
+    // no_update_ctrl_id: Option<String>,
+    // orientation: XYZ,
+    // orientation_number: i64,
+    // output: bool,
+    // part_id: Option<String>,
+    // pipe_index: i64,
+    // points: i64,
+    pub prop_id: Option<String>,
+    // quantity: Option<String>,
+    // quantity2: Option<String>,
+    // quantity_range: (f64, f64),
+    // r_id: Option<String>,
+    // reac_id: Option<String>,
+    // relative: bool,
+    // rotation: f64,
+    // setpoint: Option<f64>,
+    // smoothing_factor: f64,
+    // spec_id: Option<String>,
+    // statistics: Option<String>,
+    // statistics_start: f64,
+    // surf_id: Option<String>,
+    // time_averaged: bool,
+    // time_history: bool,
+    // trip_direction: i64,
+    // units: Option<String>,
+    // velo_index: i64,
+    // xb: Option<XB>,
+    pub xyz: Option<XYZ>,
+    // x_id: Option<String>,
+    // y_id: Option<String>,
+    // z_id: Option<String>,
+    // xyz_units: String,
 }
 
 #[derive(Clone, Debug)]
@@ -410,21 +412,56 @@ pub struct Matl {
 // ----------------------------------------
 #[derive(Clone, Debug)]
 pub struct Mesh {
-    id: Option<String>,
-    xb: XB,
-    ijk: IJK,
-    // color: String,
-    // cylindrical: bool,
-    // evacuation: bool,
-    // evac_humans: bool,
-    // evac_z_offset: f64,
-    // fyi: Option<String>,
-    // level: i64,
-    // mpi_process: Option<i64>,
-    // mult_id: Option<String>,
-    // rgb: RGB,
-    // n_threads: Option<i64>, // , PERIODIC_MESH_IDS : [Text]
+    pub id: Option<String>,
+    pub xb: XB,
+    pub ijk: IJK,
+    // pub color: String,
+    // pub cylindrical: bool,
+    // pub evacuation: bool,
+    // pub evac_humans: bool,
+    // pub evac_z_offset: f64,
+    // pub fyi: Option<String>,
+    // pub level: i64,
+    // pub mpi_process: Option<i64>,
+    // pub mult_id: Option<String>,
+    // pub rgb: RGB,
+    // pub n_threads: Option<i64>, // , PERIODIC_MESH_IDS : [Text]
 }
+
+impl Mesh {
+    pub fn resolution(&self) -> (f64, f64, f64) {
+        let ijk = self.ijk;
+        let (dx, dy, dz) = self.dimensions();
+        (dx/(ijk.i as f64), dy/(ijk.j as f64), dz/(ijk.k as f64))
+    }
+    pub fn dimensions(&self) -> (f64, f64, f64) {
+        let xb = self.xb();
+        let dx = xb.x2 - xb.x1;
+        let dy = xb.y2 - xb.y1;
+        let dz = xb.z2 - xb.z1;
+        (dx, dy, dz)
+    }
+}
+
+
+impl HasXB for Mesh {
+    fn xb(&self) -> XB {
+        self.xb.clone()
+    }
+}
+
+impl HasXB for &Mesh {
+    fn xb(&self) -> XB {
+        self.xb.clone()
+    }
+}
+
+impl HasXB for &mut Mesh {
+    fn xb(&self) -> XB {
+        self.xb.clone()
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub struct Misc {
@@ -733,67 +770,67 @@ pub struct Prof {
 
 #[derive(Clone, Debug)]
 pub struct Prop {
-    activation_obscuration: f64,
-    activation_temperature: f64,
-    alpha_c: f64,
-    alpha_e: f64,
-    bead_density: f64,
-    bead_diameter: f64,
-    bead_emissivity: f64,
-    bead_heat_transfer_coefficient: f64,
-    bead_specific_heat: f64,
-    beta_c: f64,
-    beta_e: f64,
-    // , FED_ACTIVITY : String
-    characteristic_velocity: f64,
-    c_factor: f64,
-    density: f64,
-    diameter: f64,
-    droplet_velocity: f64,
-    emissivity: f64,
-    flow_ramp: String,
-    flow_rate: f64,
-    flow_tau: f64,
-    fyi: Option<String>,
-    gauge_emissivity: f64,
-    gauge_temperature: f64,
-    heat_transfer_coefficient: f64,
-    id: Option<String>,
-    initial_temperature: f64,
-    k_factor: f64,
-    length: f64,
-    mass_flow_rate: f64,
-    offset: f64,
-    operating_pressure: f64,
-    orifice_diameter: f64,
-    p0: String,
-    particles_per_second: i64,
-    particle_velocity: f64,
-    part_id: String,
-    pdpa_end: f64,
-    pdpa_histogram: bool,
-    pdpa_histogram_limits: Vec<f64>,
-    pdpa_histogram_nbins: i64,
-    pdpa_histogram_cumulative: bool,
-    pdpa_integrate: bool,
-    pdpa_m: i64,
-    pdpa_n: i64,
-    pdpa_normalize: bool,
-    pdpa_radius: f64,
-    pdpa_start: f64,
-    pressure_ramp: String, // , PX : String
-    // , PXX : String
-    quantity: Option<String>,
-    rti: f64,
-    smokeview_id: Vec<String>,
-    smokeview_parameters: Vec<String>,
-    spec_id: String,
-    spray_angle: Vec<f64>,
-    spray_pattern_beta: f64,
-    spray_pattern_mu: f64,
-    spray_pattern_shape: String,
-    spray_pattern_table: String,
-    velocity_component: i64, // , DROPLET_VELOCITY : String
+    pub activation_obscuration: f64,
+    pub activation_temperature: f64,
+    // alpha_c: f64,
+    // alpha_e: f64,
+    // bead_density: f64,
+    // bead_diameter: f64,
+    // bead_emissivity: f64,
+    // bead_heat_transfer_coefficient: f64,
+    // bead_specific_heat: f64,
+    // beta_c: f64,
+    // beta_e: f64,
+    // // , FED_ACTIVITY : String
+    // characteristic_velocity: f64,
+    // c_factor: f64,
+    // density: f64,
+    // diameter: f64,
+    // droplet_velocity: f64,
+    // emissivity: f64,
+    // flow_ramp: String,
+    pub flow_rate: f64,
+    // flow_tau: f64,
+    // fyi: Option<String>,
+    // gauge_emissivity: f64,
+    // gauge_temperature: f64,
+    // heat_transfer_coefficient: f64,
+    // id: Option<String>,
+    // initial_temperature: f64,
+    // k_factor: f64,
+    // length: f64,
+    // mass_flow_rate: f64,
+    // offset: f64,
+    // operating_pressure: f64,
+    // orifice_diameter: f64,
+    // p0: String,
+    // particles_per_second: i64,
+    // particle_velocity: f64,
+    pub part_id: String,
+    // pdpa_end: f64,
+    // pdpa_histogram: bool,
+    // pdpa_histogram_limits: Vec<f64>,
+    // pdpa_histogram_nbins: i64,
+    // pdpa_histogram_cumulative: bool,
+    // pdpa_integrate: bool,
+    // pdpa_m: i64,
+    // pdpa_n: i64,
+    // pdpa_normalize: bool,
+    // pdpa_radius: f64,
+    // pdpa_start: f64,
+    // pressure_ramp: String, // , PX : String
+    // // , PXX : String
+    pub quantity: Option<String>,
+    pub rti: f64,
+    // smokeview_id: Vec<String>,
+    // smokeview_parameters: Vec<String>,
+    // spec_id: String,
+    // spray_angle: Vec<f64>,
+    // spray_pattern_beta: f64,
+    // spray_pattern_mu: f64,
+    // spray_pattern_shape: String,
+    // spray_pattern_table: String,
+    // velocity_component: i64, // , DROPLET_VELOCITY : String
 }
 
 #[derive(Clone, Debug)]
@@ -841,50 +878,50 @@ pub struct RampEntry {
 
 #[derive(Clone, Debug)]
 pub struct Reac {
-    a: Option<f64>,
+    pub a: Option<f64>,
     // , ALT_REAC_ID : String
-    auto_ignition_temperature: f64,
-    c: f64,
-    check_atom_balance: bool,
-    co_yield: f64,
-    critical_flame_temperature: f64,
-    e: f64,
-    epumo2: f64,
+    pub auto_ignition_temperature: f64,
+    pub c: f64,
+    pub check_atom_balance: bool,
+    pub co_yield: f64,
+    pub critical_flame_temperature: f64,
+    pub e: f64,
+    pub epumo2: f64,
     // , K : String
-    equation: String,
-    fixed_mix_time: f64,
+    pub equation: String,
+    pub fixed_mix_time: f64,
     // , FLAME_SPEED : String
     // , FLAME_SPEED_EXPONENT : String
     // , FLAME_SPEED_TEMPERATURE : String
-    formula: String,
-    fuel: String,
-    fuel_radcal_id: String,
+    pub formula: String,
+    pub fuel: String,
+    pub fuel_radcal_id: String,
     // , FWD_ID : String
-    fyi: Option<String>,
-    h: f64,
-    heat_of_combustion: f64,
-    id: Option<String>,
-    ideal: bool,
-    n: f64,
-    nu: Vec<f64>,
-    n_s: Vec<f64>,
-    n_t: f64,
-    o: f64,
+    pub fyi: Option<String>,
+    pub h: f64,
+    pub heat_of_combustion: f64,
+    pub id: Option<String>,
+    pub ideal: bool,
+    pub n: f64,
+    pub nu: Vec<f64>,
+    pub n_s: Vec<f64>,
+    pub n_t: f64,
+    pub o: f64,
     // , ODE_SOLVER : String
-    radiative_fraction: f64,
-    ramp_chi_r: String,
+    pub radiative_fraction: f64,
+    pub ramp_chi_r: String,
     // , RAMP_FS : String
-    reac_atom_error: f64,
-    reac_mass_error: f64,
+    pub reac_atom_error: f64,
+    pub reac_mass_error: f64,
     // , REVERSE : String
-    soot_h_fraction: f64,
-    soot_yield: f64,
-    spec_id_n_s: Vec<String>,
-    spec_id_nu: Vec<String>,
+    pub soot_h_fraction: f64,
+    pub soot_yield: f64,
+    pub spec_id_n_s: Vec<String>,
+    pub spec_id_nu: Vec<String>,
     // , TABLE_FS : String
     // , TAU_CHEM : String
     // , TAU_FLAME : String
-    third_body: bool,
+    pub third_body: bool,
     // , TURBULENT_FLAME_SPEED_ALPHA : String
     // , TURBULENT_FLAME_SPEED_EXPONENT : String
     // , Y_P_MIN_EDC : String
@@ -964,133 +1001,134 @@ pub struct Spec {
 
 #[derive(Clone, Debug)]
 pub struct Surf {
-    adiabatic: bool,
-    auto_ignition_temperature: f64,
-    // backing: String,
-    // burn_away: bool,
-    // cell_size_factor: f64,
-    // c_forced_constant: f64,
-    // c_forced_pr_exp: f64,
-    // c_forced_re: f64,
-    // c_forced_re_exp: f64,
-    // c_horizontal: f64,
-    // c_vertical: f64,
-    color: Option<String>,
-    // convection_length_scale: f64,
-    // convective_heat_flux: Option<f64>,
-    // convert_volume_to_mass: bool,
-    // default: bool,
-    // dt_insert: f64,
-    // emissivity: f64,
-    // emissivity_back: Option<f64>,
-    // evac_default: bool,
-    // external_flux: f64,
-    // extinction_temperature: f64,
-    // free_slip: bool,
-    fyi: Option<String>,
-    // geometry: String,
-    // heat_of_vaporization: f64,
-    // heat_transfer_coefficient: f64,
-    // heat_transfer_coefficient_back: f64,
-    // heat_transfer_model: String,
-    hrrpua: Option<f64>,
-    // ht3d: bool,
-    id: Option<String>,
-    // ignition_temperature: f64,
-    // inner_radius: f64,
-    // internal_heat_source: Vec<f64>,
-    // layer_divide: f64,
-    // leak_path: Vec<i64>,
-    // length: f64,
-    // mass_flux: Option<Vec<f64>>,
-    // mass_flux_total: Option<f64>,
-    // mass_flux_var: Option<f64>,
-    // mass_fraction: Vec<f64>,
-    // mass_transfer_coefficient: f64,
-    // matl_id: Vec<String>,
-    // matl_mass_fraction: Vec<f64>,
-    // minimum_layer_thickness: f64,
-    mlrpua: Option<f64>, // , N_CELLS_MAX : String
-                         // n_layer_cells_max: Vec<i64>,
-                         // net_heat_flux: f64,
-                         // no_slip: bool,
-                         // nppc: i64,
-                         // particle_mass_flux: f64,
-                         // part_id: String,
-                         // ple: f64,
-                         // profile: String,
-                         // radius: f64,
-                         // ramp_ef: String,
-                         // ramp_mf: Vec<String>,
-                         // ramp_part: String,
-                         // ramp_q: Option<String>,
-                         // ramp_t: Option<String>,
-                         // ramp_t_i: Option<String>,
-                         // ramp_v: Option<String>,
-                         // ramp_v_x: Option<String>,
-                         // ramp_v_y: Option<String>,
-                         // ramp_v_z: Option<String>,
-                         // rgb: RGB,
-                         // roughness: f64,
-                         // spec_id: String,
-                         // spread_rate: f64,
-                         // stretch_factor: f64,
-                         // tau_ef: f64,
-                         // tau_mf: f64,
-                         // tau_part: f64,
-                         // tau_q: f64,
-                         // tau_t: f64,
-                         // tau_v: f64,
-                         // texture_height: f64,
-                         // texture_map: String,
-                         // texture_width: f64,
-                         // tga_analysis: bool,
-                         // tga_final_temperature: f64,
-                         // tga_heating_rate: f64,
-                         // thickness: Vec<f64>,
-                         // tmp_back: f64,
-                         // tmp_front: f64,
-                         // tmp_inner: Vec<f64>,
-                         // transparency: f64,
-                         // vegetation: bool,
-                         // vegetation_arrhenius_degrad: bool,
-                         // vegetation_cdrag: f64,
-                         // vegetation_char_fraction: f64,
-                         // vegetation_element_density: i64,
-                         // vegetation_ground_temp: f64,
-                         // vegetation_height: f64,
-                         // vegetation_initial_temp: f64,
-                         // vegetation_layers: i64,
-                         // vegetation_linear_degrad: bool,
-                         // vegetation_load: f64,
-                         // vegetation_lset_ignite_time: f64,
-                         // veg_lset_qcon: f64,
-                         // vegetation_moisture: f64,
-                         // vegetation_no_burn: bool,
-                         // vegetation_svratio: i64,
-                         // veg_level_set_spread: bool,
-                         // veg_lset_ros_back: f64,
-                         // veg_lset_ros_flank: f64,
-                         // veg_lset_ros_head: f64,
-                         // veg_lset_wind_exp: f64,
-                         // veg_lset_sigma: f64,
-                         // veg_lset_ht: f64,
-                         // veg_lset_beta: f64,
-                         // veg_lset_ellipse: f64,
-                         // veg_lset_tan2: bool,
-                         // veg_lset_ellipse_head: f64,
-                         // vel: Option<f64>,
-                         // vel_bulk: f64,
-                         // vel_grad: f64,
-                         // vel_t: Option<(f64, f64)>,
-                         // volume_flow: Option<f64>,
-                         // width: f64,
-                         // xyz: XYZ,
-                         // z0: f64,
-                         // , ZETA_FRONT : String
-                         // , EXTERNAL_FLUX_RAMP : String
-                         // , TAU_EXTERNAL_FLUX : String
-                         // , VOLUME_FLUX : String
+    pub adiabatic: bool,
+    pub auto_ignition_temperature: f64,
+    // pub backing: String,
+    // pub burn_away: bool,
+    // pub cell_size_factor: f64,
+    // pub c_forced_constant: f64,
+    // pub c_forced_pr_exp: f64,
+    // pub c_forced_re: f64,
+    // pub c_forced_re_exp: f64,
+    // pub c_horizontal: f64,
+    // pub c_vertical: f64,
+    pub color: Option<String>,
+    // pub convection_length_scale: f64,
+    // pub convective_heat_flux: Option<f64>,
+    // pub convert_volume_to_mass: bool,
+    // pub default: bool,
+    // pub dt_insert: f64,
+    // pub emissivity: f64,
+    // pub emissivity_back: Option<f64>,
+    // pub evac_default: bool,
+    // pub external_flux: f64,
+    // pub extinction_temperature: f64,
+    // pub free_slip: bool,
+    pub fyi: Option<String>,
+    // pub geometry: String,
+    // pub heat_of_vaporization: f64,
+    // pub heat_transfer_coefficient: f64,
+    // pub heat_transfer_coefficient_back: f64,
+    // pub heat_transfer_model: String,
+    pub hrrpua: Option<f64>,
+    // pub ht3d: bool,
+    pub id: Option<String>,
+    // pub ignition_temperature: f64,
+    // pub inner_radius: f64,
+    // pub internal_heat_source: Vec<f64>,
+    // pub layer_divide: f64,
+    // pub leak_path: Vec<i64>,
+    // pub length: f64,
+    // pub mass_flux: Option<Vec<f64>>,
+    // pub mass_flux_total: Option<f64>,
+    // pub mass_flux_var: Option<f64>,
+    // pub mass_fraction: Vec<f64>,
+    // pub mass_transfer_coefficient: f64,
+    // pub matl_id: Vec<String>,
+    // pub matl_mass_fraction: Vec<f64>,
+    // pub minimum_layer_thickness: f64,
+    pub mlrpua: Option<f64>,
+    // , N_CELLS_MAX : String
+    // n_layer_cells_max: Vec<i64>,
+    // net_heat_flux: f64,
+    // no_slip: bool,
+    // nppc: i64,
+    // particle_mass_flux: f64,
+    // part_id: String,
+    // ple: f64,
+    // profile: String,
+    // radius: f64,
+    // ramp_ef: String,
+    // ramp_mf: Vec<String>,
+    // ramp_part: String,
+    // ramp_q: Option<String>,
+    // ramp_t: Option<String>,
+    // ramp_t_i: Option<String>,
+    // ramp_v: Option<String>,
+    // ramp_v_x: Option<String>,
+    // ramp_v_y: Option<String>,
+    // ramp_v_z: Option<String>,
+    // rgb: RGB,
+    // roughness: f64,
+    // spec_id: String,
+    // spread_rate: f64,
+    // stretch_factor: f64,
+    // tau_ef: f64,
+    // tau_mf: f64,
+    // tau_part: f64,
+    // tau_q: f64,
+    // tau_t: f64,
+    // tau_v: f64,
+    // texture_height: f64,
+    // texture_map: String,
+    // texture_width: f64,
+    // tga_analysis: bool,
+    // tga_final_temperature: f64,
+    // tga_heating_rate: f64,
+    // thickness: Vec<f64>,
+    // tmp_back: f64,
+    // tmp_front: f64,
+    // tmp_inner: Vec<f64>,
+    // transparency: f64,
+    // vegetation: bool,
+    // vegetation_arrhenius_degrad: bool,
+    // vegetation_cdrag: f64,
+    // vegetation_char_fraction: f64,
+    // vegetation_element_density: i64,
+    // vegetation_ground_temp: f64,
+    // vegetation_height: f64,
+    // vegetation_initial_temp: f64,
+    // vegetation_layers: i64,
+    // vegetation_linear_degrad: bool,
+    // vegetation_load: f64,
+    // vegetation_lset_ignite_time: f64,
+    // veg_lset_qcon: f64,
+    // vegetation_moisture: f64,
+    // vegetation_no_burn: bool,
+    // vegetation_svratio: i64,
+    // veg_level_set_spread: bool,
+    // veg_lset_ros_back: f64,
+    // veg_lset_ros_flank: f64,
+    // veg_lset_ros_head: f64,
+    // veg_lset_wind_exp: f64,
+    // veg_lset_sigma: f64,
+    // veg_lset_ht: f64,
+    // veg_lset_beta: f64,
+    // veg_lset_ellipse: f64,
+    // veg_lset_tan2: bool,
+    // veg_lset_ellipse_head: f64,
+    // vel: Option<f64>,
+    // vel_bulk: f64,
+    // vel_grad: f64,
+    // vel_t: Option<(f64, f64)>,
+    // volume_flow: Option<f64>,
+    // width: f64,
+    // xyz: XYZ,
+    // z0: f64,
+    // , ZETA_FRONT : String
+    // , EXTERNAL_FLUX_RAMP : String
+    // , TAU_EXTERNAL_FLUX : String
+    // , VOLUME_FLUX : String
 }
 
 impl Default for Surf {
@@ -1351,15 +1389,15 @@ pub struct Vent {
 
 #[derive(Clone, Debug)]
 pub struct Zone {
-    id: String,
-    leak_area: f64,
-    leak_pressure_exponent: f64,
-    leak_reference_pressure: f64,
-    xb: XB,
-    periodic: bool,
+    pub id: String,
+    pub leak_area: f64,
+    pub leak_pressure_exponent: f64,
+    pub leak_reference_pressure: f64,
+    pub xb: XB,
+    pub periodic: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Plane {
     X,
     Y,
@@ -1376,35 +1414,48 @@ pub enum Direction {
     PosZ,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct IJK {
-    i: i64,
-    j: i64,
-    k: i64,
+    pub i: i64,
+    pub j: i64,
+    pub k: i64,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct RGB {
-    r: i64,
-    g: i64,
-    b: i64,
+    pub r: i64,
+    pub g: i64,
+    pub b: i64,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct XB {
-    x1: Coord,
-    x2: Coord,
-    y1: Coord,
-    y2: Coord,
-    z1: Coord,
-    z2: Coord,
+    pub x1: Coord,
+    pub x2: Coord,
+    pub y1: Coord,
+    pub y2: Coord,
+    pub z1: Coord,
+    pub z2: Coord,
 }
 
-#[derive(Clone, Debug)]
+impl XB {
+    /// Test if two XBs intersect (i.e. their bounding boxes). Two bounding boxes
+    /// intersect of all 3 dimensions have overlap. EQ is considered overlap.
+    pub fn intersect(&self, b: &XB) -> bool {
+        let intersect_x = (self.x2 > b.x1) && (b.x2 > self.x1);
+        let intersect_y = (self.y2 > b.y1) && (b.y2 > self.y1);
+        let intersect_z = (self.z2 > b.z1) && (b.z2 > self.z1);
+        intersect_x && intersect_y && intersect_z
+    }
+}
+
+
+
+#[derive(Copy, Clone, Debug)]
 pub struct XYZ {
-    x: Coord,
-    y: Coord,
-    z: Coord,
+    pub x: Coord,
+    pub y: Coord,
+    pub z: Coord,
 }
 
 type Coord = f64;
@@ -1435,19 +1486,19 @@ pub fn decode_fds_file(namelist_file: &NamelistFile) -> FDSFile {
 fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
     match namelist.name.as_ref() {
         "OBST" => decode_obst(fds_file, namelist),
-        // "VENT" => decode_vent fdsData nml
-        // "DEVC" => decode_devc fdsData nml
-        // "PART" => decode_part fdsData nml
-        // "TIME" => decode_time fdsData nml
-        // "PROP" => decode_prop fdsData nml
-        // "SURF" => decode_surf fdsData nml
+        // "VENT" => decode_vent(fds_file, namelist),
+        // "DEVC" => decode_devc(fds_file, namelist),
+        // "PART" => decode_part(fds_file, namelist),
+        // "TIME" => decode_time(fds_file, namelist),
+        // "PROP" => decode_prop(fds_file, namelist),
+        "SURF" => decode_surf(fds_file, namelist),
         "MESH" => decode_mesh(fds_file, namelist),
-        // "SLCF" => decode_slcf fdsData nml
-        // "REAC" => decode_reac fdsData nml
-        // "HVAC" => decode_hvac fdsData nml
-        // "DUMP" => decode_dump fdsData nml
-        // "MISC" => decode_misc fdsData nml
-        // "HEAD" => decode_head fdsData nml
+        // "SLCF" => decode_slcf(fds_file, namelist),
+        // "REAC" => decode_reac(fds_file, namelist),
+        // "HVAC" => decode_hvac(fds_file, namelist),
+        // "DUMP" => decode_dump(fds_file, namelist),
+        // "MISC" => decode_misc(fds_file, namelist),
+        // "HEAD" => decode_head(fds_file, namelist),
         _ => decode_unknown(fds_file, namelist),
     }
 }
@@ -1534,6 +1585,90 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
     };
     fds_file.obsts.push(obst);
 }
+
+
+fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let devc = Devc {
+        prop_id: namelist.parameters.get("PROP_ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        xyz: namelist.parameters.get("XYZ").map(|p| match &p.value {
+                ParameterValue::Atom(x) => panic!("Expected float array, not {:?}", x),
+                ParameterValue::Array(array) => {
+                    if array.values.len() != 3 {
+                        panic!("Expected 3 values in array, found {}", array.values.len())
+                    } else {
+                        XYZ {
+                            x: match &array.values.get(&vec![0]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            y: match &array.values.get(&vec![1]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            z: match &array.values.get(&vec![2]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                        }
+                    }
+                }
+            }),
+    };
+    fds_file.devcs.push(devc);
+}
+
+
+fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let surf = Surf {
+        adiabatic: match namelist.parameters.get("ADIABATIC") {
+            None => false,
+            Some(v) => match &v.value {
+                ParameterValue::Atom(ParameterValueAtom::Bool(s)) => s.clone(),
+                ParameterValue::Atom(x) => panic!("Expected double atom, not {:?}", x),
+                ParameterValue::Array(_) => panic!("Expected double atom, not array"),
+            }
+        },
+        auto_ignition_temperature: match namelist.parameters.get("AUTO_IGNITION_TEMPERATURE") {
+            None => -273_f64,
+            Some(v) => match &v.value {
+                ParameterValue::Atom(ParameterValueAtom::Double(s)) => s.clone(),
+                ParameterValue::Atom(x) => panic!("Expected double atom, not {:?}", x),
+                ParameterValue::Array(_) => panic!("Expected double atom, not array"),
+            }
+        },
+        color: namelist.parameters.get("COLOR").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        fyi: namelist.parameters.get("FYI").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        hrrpua: namelist.parameters.get("HRRPUA").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::Double(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected double atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected double atom, not array"),
+        }),
+        id: namelist.parameters.get("ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        mlrpua: namelist.parameters.get("MLRPUA").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::Double(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected double atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected double atom, not array"),
+        }),
+    };
+    fds_file.surfs.push(surf);
+}
+
 
 // decodeVent : FDSFile -> Namelist -> FDSFile
 // decodeVent fdsData nml =
