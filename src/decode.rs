@@ -1468,14 +1468,11 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
         //     evacuation: bool,
         //     fyi: Option<String>,
         //     ht3d: bool,
-        id: namelist
-            .parameters
-            .get("ID")
-            .map(|p| match &p.value {
-                ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
-                ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
-                ParameterValue::Array(_) => panic!("Expected string atom, not array"),
-            }),
+        id: namelist.parameters.get("ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
         //     matl_id: Option<String>,
         //     mesh_id: Option<String>,
         //     mult_id: Option<String>,
