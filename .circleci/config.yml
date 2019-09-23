@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Build
           command: |
-            echo "[net]" >> ~/.cargo/config
+            echo "[net]" > ~/.cargo/config
             echo "git-fetch-with-cli = true" >> ~/.cargo/config
             yum install -y gcc make
             ~/.cargo/bin/rustup default stable
@@ -80,8 +80,10 @@ jobs:
             - deps6-cargo-{{ checksum "Cargo.toml" }}
             - deps6-cargo
       - run:
-          name: Build Server
+          name: Test
           command: |
+            cho "[net]" > ~/.cargo/config
+            echo "git-fetch-with-cli = true" >> ~/.cargo/config
             yum install -y gcc make
             ~/.cargo/bin/rustup default stable
             ~/.cargo/bin/cargo test
