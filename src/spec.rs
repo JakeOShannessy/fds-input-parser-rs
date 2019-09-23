@@ -1,4 +1,4 @@
-#![rustfmt::skip]
+// #![rustfmt::skip] // Currently unstable
 use namelist::*;
 use std::collections::HashMap;
 pub fn init_spec() -> NamelistSpec {
