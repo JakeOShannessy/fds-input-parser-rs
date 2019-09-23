@@ -413,17 +413,17 @@ pub struct Mesh {
     id: Option<String>,
     xb: XB,
     ijk: IJK,
-    color: String,
-    cylindrical: bool,
-    evacuation: bool,
-    evac_humans: bool,
-    evac_z_offset: f64,
-    fyi: Option<String>,
-    level: i64,
-    mpi_process: Option<i64>,
-    mult_id: Option<String>,
-    rgb: RGB,
-    n_threads: Option<i64>, // , PERIODIC_MESH_IDS : [Text]
+    // color: String,
+    // cylindrical: bool,
+    // evacuation: bool,
+    // evac_humans: bool,
+    // evac_z_offset: f64,
+    // fyi: Option<String>,
+    // level: i64,
+    // mpi_process: Option<i64>,
+    // mult_id: Option<String>,
+    // rgb: RGB,
+    // n_threads: Option<i64>, // , PERIODIC_MESH_IDS : [Text]
 }
 
 #[derive(Clone, Debug)]
@@ -1390,7 +1390,7 @@ pub struct RGB {
     b: i64,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct XB {
     x1: Coord,
     x2: Coord,
@@ -1441,7 +1441,7 @@ fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
         // "TIME" => decode_time fdsData nml
         // "PROP" => decode_prop fdsData nml
         // "SURF" => decode_surf fdsData nml
-        // "MESH" => decode_mesh fdsData nml
+        "MESH" => decode_mesh(fds_file, namelist),
         // "SLCF" => decode_slcf fdsData nml
         // "REAC" => decode_reac fdsData nml
         // "HVAC" => decode_hvac fdsData nml
@@ -1689,6 +1689,81 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
 //             , XYZ_UNITS = "m"
 //             }
 //     in fdsData { Devcs = devc:(Devcs fdsData)}
+
+fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let mesh = Mesh {
+        id: namelist.parameters.get("ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        ijk: {
+            let v = namelist.parameters.get("IJK").unwrap().clone();
+            match v.value {
+                ParameterValue::Atom(x) => panic!("Expected float array, not {:?}", x),
+                ParameterValue::Array(array) => {
+                    if array.values.len() != 6 {
+                        panic!("Expected 6 values in array, found {}", array.values.len())
+                    } else {
+                        IJK {
+                            i: match &array.values.get(&vec![0]).unwrap() {
+                                ParameterValueAtom::Int(x) => x.clone(),
+                                x => panic!("Expected int atom, not {:?}", x),
+                            },
+                            j: match &array.values.get(&vec![1]).unwrap() {
+                                ParameterValueAtom::Int(x) => x.clone(),
+                                x => panic!("Expected int atom, not {:?}", x),
+                            },
+                            k: match &array.values.get(&vec![2]).unwrap() {
+                                ParameterValueAtom::Int(x) => x.clone(),
+                                x => panic!("Expected int atom, not {:?}", x),
+                            },
+                        }
+                    }
+                }
+            }
+        },
+        xb: {
+            let v = namelist.parameters.get("XB").unwrap().clone();
+            match v.value {
+                ParameterValue::Atom(x) => panic!("Expected float array, not {:?}", x),
+                ParameterValue::Array(array) => {
+                    if array.values.len() != 6 {
+                        panic!("Expected 6 values in array, found {}", array.values.len())
+                    } else {
+                        XB {
+                            x1: match &array.values.get(&vec![0]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            x2: match &array.values.get(&vec![1]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            y1: match &array.values.get(&vec![2]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            y2: match &array.values.get(&vec![3]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            z1: match &array.values.get(&vec![4]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                            z2: match &array.values.get(&vec![5]).unwrap() {
+                                ParameterValueAtom::Double(x) => x.clone(),
+                                x => panic!("Expected string atom, not {:?}", x),
+                            },
+                        }
+                    }
+                }
+            }
+        },
+    };
+    fds_file.meshes.push(mesh);
+}
 
 // decodeMesh : FDSFile -> Namelist -> FDSFile
 // decodeMesh fdsData nml =

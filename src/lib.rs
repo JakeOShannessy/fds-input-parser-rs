@@ -1,7 +1,7 @@
-mod decode;
+pub mod decode;
 mod spec;
-use namelist::NamelistFile;
 pub use decode::{decode_fds_file, FDSFile};
+use namelist::NamelistFile;
 
 pub fn parse_fds_input(i: &[u8]) -> NamelistFile {
     let namelist_spec = spec::init_spec();
