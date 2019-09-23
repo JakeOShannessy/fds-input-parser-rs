@@ -1417,7 +1417,7 @@ fn simple_surf(name: String) -> Surf {
         ..Default::default()
     }
 }
-/// Convert a @NamelistFile@ to an @FDSFile@.
+/// Convert a ['NamelistFile'] to an ['FDSFile'].
 pub fn decode_fds_file(namelist_file: &NamelistFile) -> FDSFile {
     let inert_surf = simple_surf("INERT".to_string());
     let open_surf = simple_surf("OPEN".to_string());
