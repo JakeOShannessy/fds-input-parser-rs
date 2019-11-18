@@ -441,6 +441,9 @@ impl Mesh {
         let dz = xb.z2 - xb.z1;
         (dx, dy, dz)
     }
+    pub fn cells(&self) -> u64 {
+        (self.ijk.i * self.ijk.j * self.ijk.k) as u64
+    }
 }
 
 
@@ -465,145 +468,159 @@ impl HasXB for &mut Mesh {
 
 #[derive(Clone, Debug)]
 pub struct Misc {
-    agglomeration: bool,
-    aerosol_al2o3: bool,
-    allow_surface_particles: bool,
-    allow_underside_particles: bool,
-    assumed_gas_temperature: f64,
-    assumed_gas_temperature_ramp: String,
-    baroclinic: bool,
-    bndf_default: bool,
-    cc_ibm: bool,
-    cnf_cutoff: f64,
-    cfl_max: f64,
-    cfl_min: f64,
-    cfl_velocity_norm: i64,
-    check_ht: bool,
-    check_realizability: bool,
-    check_vn: bool,
-    clip_mass_fraction: bool,
-    compute_viscosity_twice: bool,
-    compute_zeta_source_term: bool,
-    constant_h_solid: bool,
-    constant_specific_heat_ratio: bool,
-    coriolis_vector: Vec<f64>,
-    correct_subgrid_temperature: bool,
-    coupled_1d3d_heat_transfer: bool,
-    c_deardorff: f64,
-    c_rng: f64,
-    c_rng_cutoff: f64,
-    c_smagorinsky: f64,
-    c_vreman: f64,
-    dns: bool,
-    drag_cfl_max: f64,
-    dt_mean_forcing: f64,
-    enthalpy_transport: bool,
-    evacuation_drill: bool,
-    evacuation_mc_mode: bool,
-    evac_pressure_iterations: i64,
-    evac_surf_default: String,
-    evac_time_iterations: i64,
-    evaporation: bool,
-    // , EXCHANGE_EDGES : String
-    external_boundary_correction: bool,
-    extinction_model: String,
-    hvac_pres_relax: f64,
-    ht3d_test: i64,
-    fds5_options: bool,
-    flux_limiter: i64,
-    force_vector: Vec<f64>,
-    freeze_velocity: bool,
-    fyi: Option<String>,
-    gamma: f64,
-    gravitational_deposition: bool,
-    gravitational_settling: bool,
-    ground_level: f64,
-    gvec: Vec<f64>,
-    dt_hvac: f64,
-    h_f_reference_temperature: f64,
-    hrrpuv_max_smv: f64,
-    humidity: f64,
-    hvac_mass_transport: bool,
-    iblank_smv: bool,
-    immersed_boundary_method: i64,
-    initial_unmixed_fraction: f64, // , KINETIC_ENERGY_SOURCE : String
-    lapse_rate: f64,
-    les_filter_width: String,
-    max_chemistry_iterations: i64,
-    max_leak_paths: i64,
-    maximum_visibility: f64,
-    mean_forcing: Vec<bool>,
-    mpi_timeout: f64,
-    n_fixed_chemistry_substeps: i64,
-    near_wall_turbulence_model: String, // , NEW_MOMENTUM_NUDGING : String
-    // , NEW_OPEN_BOUNDARY : String
-    noise: bool,
-    noise_velocity: f64,
-    no_evacuation: bool,
-    no_ramps: bool, // , NORTHANGLE : String
-    overwrite: bool,
-    particle_cfl_max: f64,
-    particle_cfl_min: f64,
-    particle_cfl: bool,
-    periodic_test: i64, // , PROFILING : String
-    porous_floor: bool, // , POTENTIAL_TEMPERATURE_CORRECTION : String
-    pr: f64,
-    process_all_meshes: bool,
-    projection: bool,
-    p_inf: f64, // , RAMP_FVX_T : String
-    // , RAMP_FVY_T : String
-    // , RAMP_FVZ_T : String
-    ramp_gx: String,
-    ramp_gy: String,
-    ramp_gz: String,
-    ramp_u0: String,
-    ramp_u0_t: String,
-    ramp_v0: String,
-    ramp_v0_t: String,
-    ramp_w0: String,
-    ramp_w0_t: String,
-    ramp_u0_z: String,
-    ramp_v0_z: String,
-    ramp_w0_z: String, // , RADIATION : String
-    research_mode: bool,
-    restart: bool,
-    restart_chid: String,
-    richardson_error_tolerance: f64,
-    run_avg_fac: f64,
-    sc: f64,
-    second_order_interpolated_boundary: bool,
-    second_order_particle_transport: bool,
-    shared_file_system: bool, // , SLIP_CONDITION : String
-    smoke_albedo: f64,
-    solid_phase_only: bool, // , SOOT_OXIDATION : String
-    // , SPONGE_LAYER_DISTANCE : String
-    stratification: bool,
-    suppression: bool, // , SURF_DEFAULT : String
-    // , TEMPERATURE_DEPENDENT_REACTION : String
-    // , TENSOR_DIFFUSIVITY : String
-    terrain_case: bool,
-    terrain_image: String, // , TEST_FILTER_QUADRATURE : String
-    texture_origin: Vec<f64>,
-    thermophoretic_deposition: bool,
-    thicken_obstructions: bool, // , TRANSPORT_UNMIXED_FRACTION : String
-    // , TRANSPORT_ZETA_SCHEME : String
-    tmpa: f64,
-    turbulence_model: String,
-    turbulent_deposition: bool, // , TURB_INIT_CLOCK : String
-    u0: f64,
-    uvw_file: String,
-    v0: f64,
-    veg_level_set_coupled: bool,
-    veg_level_set_uncoupled: bool,
-    verbose: f64,
-    visibility_factor: f64,
-    vn_max: f64,
-    vn_min: f64,
-    y_co2_infty: f64,
-    y_o2_infty: f64,
-    w0: f64, // , WD_PROPS : String
-             // , WIND_BOUNDARY : String
-             // , WIND_ONLY : String
+    // agglomeration: bool,
+    // aerosol_al2o3: bool,
+    // allow_surface_particles: bool,
+    // allow_underside_particles: bool,
+    // assumed_gas_temperature: f64,
+    // assumed_gas_temperature_ramp: String,
+    // baroclinic: bool,
+    // bndf_default: bool,
+    // cc_ibm: bool,
+    // cnf_cutoff: f64,
+    // cfl_max: f64,
+    // cfl_min: f64,
+    // cfl_velocity_norm: i64,
+    // check_ht: bool,
+    // check_realizability: bool,
+    // check_vn: bool,
+    // clip_mass_fraction: bool,
+    // compute_viscosity_twice: bool,
+    // compute_zeta_source_term: bool,
+    // constant_h_solid: bool,
+    // constant_specific_heat_ratio: bool,
+    // coriolis_vector: Vec<f64>,
+    // correct_subgrid_temperature: bool,
+    // coupled_1d3d_heat_transfer: bool,
+    // c_deardorff: f64,
+    // c_rng: f64,
+    // c_rng_cutoff: f64,
+    // c_smagorinsky: f64,
+    // c_vreman: f64,
+    // dns: bool,
+    // drag_cfl_max: f64,
+    // dt_mean_forcing: f64,
+    // enthalpy_transport: bool,
+    // evacuation_drill: bool,
+    // evacuation_mc_mode: bool,
+    // evac_pressure_iterations: i64,
+    // evac_surf_default: String,
+    // evac_time_iterations: i64,
+    // evaporation: bool,
+    // // , EXCHANGE_EDGES : String
+    // external_boundary_correction: bool,
+    // extinction_model: String,
+    // hvac_pres_relax: f64,
+    // ht3d_test: i64,
+    // fds5_options: bool,
+    // flux_limiter: i64,
+    // force_vector: Vec<f64>,
+    // freeze_velocity: bool,
+    // fyi: Option<String>,
+    // gamma: f64,
+    // gravitational_deposition: bool,
+    // gravitational_settling: bool,
+    // ground_level: f64,
+    // gvec: Vec<f64>,
+    // dt_hvac: f64,
+    // h_f_reference_temperature: f64,
+    // hrrpuv_max_smv: f64,
+    // humidity: f64,
+    // hvac_mass_transport: bool,
+    // iblank_smv: bool,
+    // immersed_boundary_method: i64,
+    // initial_unmixed_fraction: f64,
+    // // , KINETIC_ENERGY_SOURCE : String
+    // lapse_rate: f64,
+    // les_filter_width: String,
+    // max_chemistry_iterations: i64,
+    // max_leak_paths: i64,
+    pub maximum_visibility: f64,
+    // mean_forcing: Vec<bool>,
+    // mpi_timeout: f64,
+    // n_fixed_chemistry_substeps: i64,
+    // near_wall_turbulence_model: String,
+    // // , NEW_MOMENTUM_NUDGING : String
+    // // , NEW_OPEN_BOUNDARY : String
+    // noise: bool,
+    // noise_velocity: f64,
+    // no_evacuation: bool,
+    // no_ramps: bool,
+    // // , NORTHANGLE : String
+    // overwrite: bool,
+    // particle_cfl_max: f64,
+    // particle_cfl_min: f64,
+    // particle_cfl: bool,
+    // periodic_test: i64,
+    // // , PROFILING : String
+    // porous_floor: bool,
+    // // , POTENTIAL_TEMPERATURE_CORRECTION : String
+    // pr: f64,
+    // process_all_meshes: bool,
+    // projection: bool,
+    // p_inf: f64,
+    // // , RAMP_FVX_T : String
+    // // , RAMP_FVY_T : String
+    // // , RAMP_FVZ_T : String
+    // ramp_gx: String,
+    // ramp_gy: String,
+    // ramp_gz: String,
+    // ramp_u0: String,
+    // ramp_u0_t: String,
+    // ramp_v0: String,
+    // ramp_v0_t: String,
+    // ramp_w0: String,
+    // ramp_w0_t: String,
+    // ramp_u0_z: String,
+    // ramp_v0_z: String,
+    // ramp_w0_z: String,
+    // // , RADIATION : String
+    // research_mode: bool,
+    // restart: bool,
+    // restart_chid: String,
+    // richardson_error_tolerance: f64,
+    // run_avg_fac: f64,
+    // sc: f64,
+    // second_order_interpolated_boundary: bool,
+    // second_order_particle_transport: bool,
+    // shared_file_system: bool,
+    // // , SLIP_CONDITION : String
+    // smoke_albedo: f64,
+    // solid_phase_only: bool,
+    // // , SOOT_OXIDATION : String
+    // // , SPONGE_LAYER_DISTANCE : String
+    // stratification: bool,
+    // suppression: bool,
+    // // , SURF_DEFAULT : String
+    // // , TEMPERATURE_DEPENDENT_REACTION : String
+    // // , TENSOR_DIFFUSIVITY : String
+    // terrain_case: bool,
+    // terrain_image: String,
+    // // , TEST_FILTER_QUADRATURE : String
+    // texture_origin: Vec<f64>,
+    // thermophoretic_deposition: bool,
+    // thicken_obstructions: bool,
+    // // , TRANSPORT_UNMIXED_FRACTION : String
+    // // , TRANSPORT_ZETA_SCHEME : String
+    // tmpa: f64,
+    // turbulence_model: String,
+    // turbulent_deposition: bool,
+    // // , TURB_INIT_CLOCK : String
+    // u0: f64,
+    // uvw_file: String,
+    // v0: f64,
+    // veg_level_set_coupled: bool,
+    // veg_level_set_uncoupled: bool,
+    // verbose: f64,
+    pub visibility_factor: f64,
+    // vn_max: f64,
+    // vn_min: f64,
+    // y_co2_infty: f64,
+    // y_o2_infty: f64,
+    // w0: f64,
+    // // , WD_PROPS : String
+    // // , WIND_BOUNDARY : String
+    // // , WIND_ONLY : String
 }
 
 #[derive(Clone, Debug)]
@@ -1553,27 +1570,27 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
                         panic!("Expected 6 values in array, found {}", array.values.len())
                     } else {
                         XB {
-                            x1: match &array.values.get(&vec![0]).unwrap() {
+                            x1: match &array.values.get(&vec![1]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            x2: match &array.values.get(&vec![1]).unwrap() {
+                            x2: match &array.values.get(&vec![2]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            y1: match &array.values.get(&vec![2]).unwrap() {
+                            y1: match &array.values.get(&vec![3]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            y2: match &array.values.get(&vec![3]).unwrap() {
+                            y2: match &array.values.get(&vec![4]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            z1: match &array.values.get(&vec![4]).unwrap() {
+                            z1: match &array.values.get(&vec![5]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            z2: match &array.values.get(&vec![5]).unwrap() {
+                            z2: match &array.values.get(&vec![6]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
@@ -1585,7 +1602,6 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
     };
     fds_file.obsts.push(obst);
 }
-
 
 fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
     let devc = Devc {
@@ -1601,15 +1617,15 @@ fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
                         panic!("Expected 3 values in array, found {}", array.values.len())
                     } else {
                         XYZ {
-                            x: match &array.values.get(&vec![0]).unwrap() {
+                            x: match &array.values.get(&vec![1]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            y: match &array.values.get(&vec![1]).unwrap() {
+                            y: match &array.values.get(&vec![2]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            z: match &array.values.get(&vec![2]).unwrap() {
+                            z: match &array.values.get(&vec![3]).unwrap() {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
@@ -1837,19 +1853,19 @@ fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
             match v.value {
                 ParameterValue::Atom(x) => panic!("Expected float array, not {:?}", x),
                 ParameterValue::Array(array) => {
-                    if array.values.len() != 6 {
-                        panic!("Expected 6 values in array, found {}", array.values.len())
+                    if array.values.len() != 3 {
+                        panic!("Expected 3 values in array, found {}", array.values.len())
                     } else {
                         IJK {
-                            i: match &array.values.get(&vec![0]).unwrap() {
+                            i: match &array.values.get(&vec![1]).expect(&format!("no i value {:?}", array.values)) {
                                 ParameterValueAtom::Int(x) => x.clone(),
                                 x => panic!("Expected int atom, not {:?}", x),
                             },
-                            j: match &array.values.get(&vec![1]).unwrap() {
+                            j: match &array.values.get(&vec![2]).expect("no j value") {
                                 ParameterValueAtom::Int(x) => x.clone(),
                                 x => panic!("Expected int atom, not {:?}", x),
                             },
-                            k: match &array.values.get(&vec![2]).unwrap() {
+                            k: match &array.values.get(&vec![3]).expect("no k value") {
                                 ParameterValueAtom::Int(x) => x.clone(),
                                 x => panic!("Expected int atom, not {:?}", x),
                             },
@@ -1867,27 +1883,27 @@ fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
                         panic!("Expected 6 values in array, found {}", array.values.len())
                     } else {
                         XB {
-                            x1: match &array.values.get(&vec![0]).unwrap() {
+                            x1: match &array.values.get(&vec![1]).expect("x1") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            x2: match &array.values.get(&vec![1]).unwrap() {
+                            x2: match &array.values.get(&vec![2]).expect("x2") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            y1: match &array.values.get(&vec![2]).unwrap() {
+                            y1: match &array.values.get(&vec![3]).expect("y1") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            y2: match &array.values.get(&vec![3]).unwrap() {
+                            y2: match &array.values.get(&vec![4]).expect("y2") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            z1: match &array.values.get(&vec![4]).unwrap() {
+                            z1: match &array.values.get(&vec![5]).expect("z1") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
-                            z2: match &array.values.get(&vec![5]).unwrap() {
+                            z2: match &array.values.get(&vec![6]).expect("z2") {
                                 ParameterValueAtom::Double(x) => x.clone(),
                                 x => panic!("Expected string atom, not {:?}", x),
                             },
