@@ -577,6 +577,7 @@ pub fn init_spec() -> NamelistSpec {
         group_spec.insert("HRRPUA".to_string(), ParameterSpec::Atom(ParameterSpecAtom::Double));
         group_spec.insert("HT3D".to_string(), ParameterSpec::Atom(ParameterSpecAtom::Bool));
         group_spec.insert("ID".to_string(), ParameterSpec::Atom(ParameterSpecAtom::String));
+        group_spec.insert("AUTO_IGNITION_TEMPERATURE".to_string(), ParameterSpec::Atom(ParameterSpecAtom::Double));
         group_spec.insert("IGNITION_TEMPERATURE".to_string(), ParameterSpec::Atom(ParameterSpecAtom::Double));
         group_spec.insert("INNER_RADIUS".to_string(), ParameterSpec::Atom(ParameterSpecAtom::Double));
         group_spec.insert("INTERNAL_HEAT_SOURCE".to_string(), ParameterSpec::Array(ParameterSpecAtom::Double));
