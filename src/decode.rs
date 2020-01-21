@@ -669,12 +669,53 @@ pub struct Obst {
     // removable: bool,
     // rgb: Option<RGB>,
     surf_id: Option<String>,
-    // surf_id6: Option<(String, String, String, String, String, String)>,
-    // surf_ids: Option<(String, String, String)>,
+    surf_id6: Option<(String, String, String, String, String, String)>,
+    surf_ids: Option<(String, String, String)>,
     // texture_origin: XYZ,
     // thicken: bool,
     // transparency: f64,
     xb: XB,
+}
+
+impl Obst {
+    pub fn surf_ids(&self) -> Vec<String> {
+        let mut ss = Vec::with_capacity(6);
+        match &self.surf_id {
+            Some(s) => {
+                ss.push(s.clone());
+            },
+            _ => (),
+        }
+        match &self.surf_ids {
+            Some((s1,s2,s3)) => {
+                ss.push(s1.clone());
+                ss.push(s2.clone());
+                ss.push(s3.clone());
+            },
+            _ => (),
+        }
+        match &self.surf_id6 {
+            Some((s1,s2,s3,s4,s5,s6)) => {
+                ss.push(s1.clone());
+                ss.push(s2.clone());
+                ss.push(s3.clone());
+                ss.push(s4.clone());
+                ss.push(s5.clone());
+                ss.push(s6.clone());
+            },
+            _ => (),
+        }
+        ss
+    }
+
+    pub fn has_surf(&self, surf_id: &str) -> bool {
+        for id in self.surf_ids() {
+            if &id == surf_id {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -1556,8 +1597,28 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
             ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
             ParameterValue::Array(_) => panic!("Expected string atom, not array"),
         }),
-        // surf_id6: namelist.parameters.get("SURF_ID6").cloned(),
-        // surf_ids: namelist.parameters.get("SURF_IDS").cloned(),
+        surf_id6: namelist.parameters.get("SURF_ID6").map(|p| match &p.value {
+            ParameterValue::Atom(x) => panic!("Expected array, not {:?}", x),
+            ParameterValue::Array(arr) => {
+                let m = &arr.values;
+                let vals = (m.get(&vec![1]),m.get(&vec![2]),m.get(&vec![3]),m.get(&vec![4]),m.get(&vec![5]),m.get(&vec![6]));
+                match vals {
+                    (Some(ParameterValueAtom::String(a)),Some(ParameterValueAtom::String(b)),Some(ParameterValueAtom::String(c)),Some(ParameterValueAtom::String(d)),Some(ParameterValueAtom::String(e)),Some(ParameterValueAtom::String(f))) => Some((a.clone(),b.clone(),c.clone(),d.clone(),e.clone(),f.clone())),
+                    _ => None
+                }
+            },
+        }).flatten(),
+        surf_ids: namelist.parameters.get("SURF_IDS").map(|p| match &p.value {
+            ParameterValue::Atom(x) => panic!("Expected array, not {:?}", x),
+            ParameterValue::Array(arr) => {
+                let m = &arr.values;
+                let vals = (m.get(&vec![1]),m.get(&vec![2]),m.get(&vec![3]));
+                match vals {
+                    (Some(ParameterValueAtom::String(a)),Some(ParameterValueAtom::String(b)),Some(ParameterValueAtom::String(c))) => Some((a.clone(),b.clone(),c.clone())),
+                    _ => None
+                }
+            },
+        }).flatten(),
         //     texture_origin: XYZ,
         //     thicken: bool,
         //     transparency: f64,
