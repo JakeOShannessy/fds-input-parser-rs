@@ -49,6 +49,20 @@ pub struct FDSFile {
     pub unknown_namelists: Vec<Namelist>,
 }
 
+impl FDSFile {
+    pub fn get_surf(&self, surf_id: &str) -> Option<&Surf> {
+        for s in &self.surfs {
+            match &s.id {
+                Some(id) => if id == surf_id {
+                    return Some(s);
+                },
+                None => (),
+            }
+        }
+        None
+    }
+}
+
 impl Default for FDSFile {
     fn default() -> Self {
         FDSFile {
@@ -657,7 +671,7 @@ pub struct Obst {
     // evacuation: bool,
     // fyi: Option<String>,
     // ht3d: bool,
-    id: Option<String>,
+    pub id: Option<String>,
     // matl_id: Option<String>,
     // mesh_id: Option<String>,
     // mult_id: Option<String>,
@@ -668,13 +682,13 @@ pub struct Obst {
     // prop_id: Option<String>,
     // removable: bool,
     // rgb: Option<RGB>,
-    surf_id: Option<String>,
-    surf_id6: Option<(String, String, String, String, String, String)>,
-    surf_ids: Option<(String, String, String)>,
+    pub surf_id: Option<String>,
+    pub surf_id6: Option<(String, String, String, String, String, String)>,
+    pub surf_ids: Option<(String, String, String)>,
     // texture_origin: XYZ,
     // thicken: bool,
     // transparency: f64,
-    xb: XB,
+    pub xb: XB,
 }
 
 impl Obst {
@@ -715,6 +729,21 @@ impl Obst {
             }
         }
         false
+    }
+
+    pub fn area_x(&self) -> Option<f64> {
+        let xb = Some(self.xb)?;
+        Some((xb.y2-xb.y1)*(xb.z2-xb.z1))
+    }
+
+    pub fn area_y(&self) -> Option<f64> {
+        let xb = Some(self.xb)?;
+        Some((xb.x2-xb.x1)*(xb.z2-xb.z1))
+    }
+
+    pub fn area_z(&self) -> Option<f64> {
+        let xb = Some(self.xb)?;
+        Some((xb.x2-xb.x1)*(xb.y2-xb.y1))
     }
 }
 
@@ -1410,39 +1439,76 @@ pub struct Trnz {
 
 #[derive(Clone, Debug)]
 pub struct Vent {
-    color: Option<String>,
-    ctrl_id: String,
-    devc_id: String,
-    dynamic_pressure: f64,
-    evacuation: bool,
-    fyi: Option<String>,
-    id: Option<String>,
-    ior: i64,
-    l_eddy: f64,
-    l_eddy_ij: Vec<i64>,
-    mb: String,
-    mesh_id: String,
-    mult_id: String,
-    n_eddy: i64,
-    outline: bool,
-    pbx: f64,
-    pby: f64,
-    pbz: f64,
-    pressure_ramp: String,
-    radius: f64,
-    reynolds_stress: Vec<f64>,
-    rgb: RGB,
-    spread_rate: f64,
-    surf_id: Option<String>,
-    texture_origin: Vec<f64>,
-    tmp_exterior: f64,
-    tmp_exterior_ramp: String,
-    transparency: f64,
-    uvw: Vec<f64>,
-    vel_rms: f64,
-    // , WIND : String
-    xb: Option<XB>,
-    xyz: XYZ,
+    // color: Option<String>,
+    // ctrl_id: String,
+    // devc_id: String,
+    // dynamic_pressure: f64,
+    // evacuation: bool,
+    // fyi: Option<String>,
+    pub id: Option<String>,
+    // ior: i64,
+    // l_eddy: f64,
+    // l_eddy_ij: Vec<i64>,
+    // mb: String,
+    // mesh_id: String,
+    // mult_id: String,
+    // n_eddy: i64,
+    // outline: bool,
+    // pbx: f64,
+    // pby: f64,
+    // pbz: f64,
+    // pressure_ramp: String,
+    // radius: f64,
+    // reynolds_stress: Vec<f64>,
+    // rgb: RGB,
+    // spread_rate: f64,
+    pub surf_id: Option<String>,
+    // texture_origin: Vec<f64>,
+    // tmp_exterior: f64,
+    // tmp_exterior_ramp: String,
+    // transparency: f64,
+    // uvw: Vec<f64>,
+    // vel_rms: f64,
+    // // , WIND : String
+    pub xb: Option<XB>,
+    // xyz: XYZ,
+}
+
+
+impl Vent {
+    pub fn surf_ids(&self) -> Vec<String> {
+        let mut ss = Vec::with_capacity(1);
+        match &self.surf_id {
+            Some(s) => {
+                ss.push(s.clone());
+            },
+            _ => (),
+        }
+        ss
+    }
+
+    pub fn has_surf(&self, surf_id: &str) -> bool {
+        for id in self.surf_ids() {
+            if &id == surf_id {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// The area of a vent. As a vent must be 2d it only has one area.
+    pub fn area(&self) -> Option<f64> {
+        let xb = self.xb?;
+        if xb.x1 == xb.x2 {
+            Some((xb.y2-xb.y1)*(xb.z2-xb.z1))
+        } else if xb.y1 == xb.y2 {
+            Some((xb.x2-xb.x1)*(xb.z2-xb.z1))
+        } else if xb.z1 == xb.z2 {
+            Some((xb.x2-xb.x1)*(xb.y2-xb.y1))
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -1544,7 +1610,7 @@ pub fn decode_fds_file(namelist_file: &NamelistFile) -> FDSFile {
 fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
     match namelist.name.as_ref() {
         "OBST" => decode_obst(fds_file, namelist),
-        // "VENT" => decode_vent(fds_file, namelist),
+        "VENT" => decode_vent(fds_file, namelist),
         // "DEVC" => decode_devc(fds_file, namelist),
         // "PART" => decode_part(fds_file, namelist),
         // "TIME" => decode_time(fds_file, namelist),
@@ -1662,6 +1728,88 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
         },
     };
     fds_file.obsts.push(obst);
+}
+
+
+fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let vent = Vent {
+        //     allow_vent: bool,
+        //     bndf_face: (bool, bool, bool, bool, bool, bool),
+        //     bndf_obst: bool,
+        //     bulk_density: Option<f64>,
+        //     color: Option<String>,
+        //     ctrl_id: Option<String>,
+        //     devc_id: Option<String>,
+        //     evacuation: bool,
+        //     fyi: Option<String>,
+        //     ht3d: bool,
+        id: namelist.parameters.get("ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        //     matl_id: Option<String>,
+        //     mesh_id: Option<String>,
+        //     mult_id: Option<String>,
+        //     // , NOTERRAIN : bool
+        //     outline: bool,
+        //     overlay: bool,
+        //     permit_hole: bool,
+        //     prop_id: Option<String>,
+        //     removable: bool,
+        //     rgb: Option<RGB>,
+        surf_id: namelist.parameters.get("SURF_ID").map(|p| match &p.value {
+            ParameterValue::Atom(ParameterValueAtom::String(s)) => s.clone(),
+            ParameterValue::Atom(x) => panic!("Expected string atom, not {:?}", x),
+            ParameterValue::Array(_) => panic!("Expected string atom, not array"),
+        }),
+        //     texture_origin: XYZ,
+        //     thicken: bool,
+        //     transparency: f64,
+        xb: {
+            let v = namelist.parameters.get("XB");
+            match v {
+                None => None,
+                Some(v) => match &v.value {
+                    ParameterValue::Atom(x) => panic!("Expected float array, not {:?}", x),
+                    ParameterValue::Array(array) => {
+                        if array.values.len() != 6 {
+                            panic!("Expected 6 values in array, found {}", array.values.len())
+                        } else {
+                            Some(XB {
+                                x1: match &array.values.get(&vec![1]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                                x2: match &array.values.get(&vec![2]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                                y1: match &array.values.get(&vec![3]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                                y2: match &array.values.get(&vec![4]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                                z1: match &array.values.get(&vec![5]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                                z2: match &array.values.get(&vec![6]).unwrap() {
+                                    ParameterValueAtom::Double(x) => x.clone(),
+                                    x => panic!("Expected string atom, not {:?}", x),
+                                },
+                            })
+                        }
+                    }
+                }
+            }
+
+        },
+    };
+    fds_file.vents.push(vent);
 }
 
 fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
