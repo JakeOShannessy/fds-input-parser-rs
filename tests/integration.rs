@@ -13,11 +13,16 @@ mod integration {
     }
 
     #[test]
+    fn parse_file_test_array() {
+        let nmls = parse_fds_input(include_str!("TestArray.fds"));
+        for nml in nmls {
+            println!("nml: {:?}", nml);
+        }
+    }
+
+    #[test]
     fn parse_file_test_b() {
         let nml = parse_fds_input(include_str!("TestB.fds"));
-        // for (i, namelist) in nml.namelists.iter().enumerate() {
-        //     println!("{}: {:?}", i, namelist);
-        // }
         assert_eq!(nml.len(), 18);
     }
 
@@ -47,10 +52,5 @@ mod integration {
                 }
             }
         }
-        let nml = parse_fds_input(include_str!("TestB.fds"));
-        // for (i, namelist) in nml.namelists.iter().enumerate() {
-        //     println!("{}: {:?}", i, namelist);
-        // }
-        assert_eq!(nml.len(), 18);
     }
 }
