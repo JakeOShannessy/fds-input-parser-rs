@@ -1,3 +1,5 @@
+use crate::xb::HasXB;
+use crate::xb::*;
 ///! This module defines data structures for FDS input data, and the functions
 ///! for converting them to and from Fortran Namelists. This is inherently less
 ///! flexible than the Namelist data, which can hold any data, but allows us to
@@ -13,8 +15,6 @@
 // use namelist::Namelist;
 // use namelist::NamelistFile;
 use namelist::*;
-use crate::xb::*;
-use crate::xb::HasXB;
 use std::convert::{TryFrom, TryInto};
 
 /// The Haskell data type representation of an FDS input script. The first items
@@ -51,16 +51,17 @@ pub struct FDSFile {
 }
 
 impl FDSFile {
-
     pub fn new() -> Self {
         Default::default()
     }
     pub fn get_surf(&self, surf_id: &str) -> Option<&Surf> {
         for s in &self.surfs {
             match &s.id {
-                Some(id) => if id == surf_id {
-                    return Some(s);
-                },
+                Some(id) => {
+                    if id == surf_id {
+                        return Some(s);
+                    }
+                }
                 None => (),
             }
         }
@@ -455,7 +456,11 @@ impl Mesh {
     pub fn resolution(&self) -> (f64, f64, f64) {
         let ijk = self.ijk;
         let (dx, dy, dz) = self.dimensions();
-        (dx/(ijk.i as f64), dy/(ijk.j as f64), dz/(ijk.k as f64))
+        (
+            dx / (ijk.i as f64),
+            dy / (ijk.j as f64),
+            dz / (ijk.k as f64),
+        )
     }
     pub fn dimensions(&self) -> (f64, f64, f64) {
         let xb = self.xb();
@@ -468,7 +473,6 @@ impl Mesh {
         (self.ijk.i * self.ijk.j * self.ijk.k) as u64
     }
 }
-
 
 impl HasXB for Mesh {
     fn xb(&self) -> XB {
@@ -487,7 +491,6 @@ impl HasXB for &mut Mesh {
         self.xb.clone()
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Misc {
@@ -706,26 +709,26 @@ impl Obst {
         match &self.surf_id {
             Some(s) => {
                 ss.push(s.clone());
-            },
+            }
             _ => (),
         }
         match &self.surf_ids {
-            Some((s1,s2,s3)) => {
+            Some((s1, s2, s3)) => {
                 ss.push(s1.clone());
                 ss.push(s2.clone());
                 ss.push(s3.clone());
-            },
+            }
             _ => (),
         }
         match &self.surf_id6 {
-            Some((s1,s2,s3,s4,s5,s6)) => {
+            Some((s1, s2, s3, s4, s5, s6)) => {
                 ss.push(s1.clone());
                 ss.push(s2.clone());
                 ss.push(s3.clone());
                 ss.push(s4.clone());
                 ss.push(s5.clone());
                 ss.push(s6.clone());
-            },
+            }
             _ => (),
         }
         ss
@@ -742,17 +745,17 @@ impl Obst {
 
     pub fn area_x(&self) -> Option<f64> {
         let xb = Some(self.xb)?;
-        Some((xb.y2-xb.y1)*(xb.z2-xb.z1))
+        Some((xb.y2 - xb.y1) * (xb.z2 - xb.z1))
     }
 
     pub fn area_y(&self) -> Option<f64> {
         let xb = Some(self.xb)?;
-        Some((xb.x2-xb.x1)*(xb.z2-xb.z1))
+        Some((xb.x2 - xb.x1) * (xb.z2 - xb.z1))
     }
 
     pub fn area_z(&self) -> Option<f64> {
         let xb = Some(self.xb)?;
-        Some((xb.x2-xb.x1)*(xb.y2-xb.y1))
+        Some((xb.x2 - xb.x1) * (xb.y2 - xb.y1))
     }
 }
 
@@ -1483,14 +1486,13 @@ pub struct Vent {
     // xyz: XYZ,
 }
 
-
 impl Vent {
     pub fn surf_ids(&self) -> Vec<String> {
         let mut ss = Vec::with_capacity(1);
         match &self.surf_id {
             Some(s) => {
                 ss.push(s.clone());
-            },
+            }
             _ => (),
         }
         ss
@@ -1509,11 +1511,11 @@ impl Vent {
     pub fn area(&self) -> Option<f64> {
         let xb = self.xb?;
         if xb.x1 == xb.x2 {
-            Some((xb.y2-xb.y1)*(xb.z2-xb.z1))
+            Some((xb.y2 - xb.y1) * (xb.z2 - xb.z1))
         } else if xb.y1 == xb.y2 {
-            Some((xb.x2-xb.x1)*(xb.z2-xb.z1))
+            Some((xb.x2 - xb.x1) * (xb.z2 - xb.z1))
         } else if xb.z1 == xb.z2 {
-            Some((xb.x2-xb.x1)*(xb.y2-xb.y1))
+            Some((xb.x2 - xb.x1) * (xb.y2 - xb.y1))
         } else {
             None
         }
@@ -1560,17 +1562,19 @@ impl TryFrom<ParameterValue> for IJK {
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
             ParameterValue::Atom(s) => panic!("expected array"),
-            ParameterValue::Array(vmap) => {
-                match vmap.len() {
-                    3 => {
-                        Ok(IJK {
-                            i: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone()).try_into().unwrap(),
-                            j: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone()).try_into().unwrap(),
-                            k: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone()).try_into().unwrap(),
-                        })
-                    }
-                    l => panic!("expected array of lengh 3, not {}", l),
-                }
+            ParameterValue::Array(vmap) => match vmap.len() {
+                3 => Ok(IJK {
+                    i: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    j: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    k: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                }),
+                l => panic!("expected array of lengh 3, not {}", l),
             },
         }
     }
@@ -1604,27 +1608,34 @@ impl XB {
     }
 }
 
-
 impl TryFrom<ParameterValue> for XB {
     type Error = ();
 
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
             ParameterValue::Atom(s) => panic!("expected array"),
-            ParameterValue::Array(vmap) => {
-                match vmap.len() {
-                    6 => {
-                        Ok(XB {
-                            x1: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone()).try_into().unwrap(),
-                            x2: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone()).try_into().unwrap(),
-                            y1: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone()).try_into().unwrap(),
-                            y2: ParameterValue::Atom(vmap.get(&vec![4]).unwrap().clone()).try_into().unwrap(),
-                            z1: ParameterValue::Atom(vmap.get(&vec![5]).unwrap().clone()).try_into().unwrap(),
-                            z2: ParameterValue::Atom(vmap.get(&vec![6]).unwrap().clone()).try_into().unwrap(),
-                        })
-                    }
-                    l => panic!("expected array of lengh 3, not {}", l),
-                }
+            ParameterValue::Array(vmap) => match vmap.len() {
+                6 => Ok(XB {
+                    x1: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    x2: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    y1: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    y2: ParameterValue::Atom(vmap.get(&vec![4]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    z1: ParameterValue::Atom(vmap.get(&vec![5]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    z2: ParameterValue::Atom(vmap.get(&vec![6]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                }),
+                l => panic!("expected array of lengh 3, not {}", l),
             },
         }
     }
@@ -1637,29 +1648,29 @@ pub struct XYZ {
     pub z: Coord,
 }
 
-
 impl TryFrom<ParameterValue> for XYZ {
     type Error = ();
 
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
             ParameterValue::Atom(s) => panic!("expected array"),
-            ParameterValue::Array(vmap) => {
-                match vmap.len() {
-                    3 => {
-                        Ok(XYZ {
-                            x: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone()).try_into().unwrap(),
-                            y: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone()).try_into().unwrap(),
-                            z: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone()).try_into().unwrap(),
-                        })
-                    }
-                    l => panic!("expected array of lengh 3, not {}", l),
-                }
+            ParameterValue::Array(vmap) => match vmap.len() {
+                3 => Ok(XYZ {
+                    x: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    y: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    z: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                }),
+                l => panic!("expected array of lengh 3, not {}", l),
             },
         }
     }
 }
-
 
 type Coord = f64;
 
@@ -1722,7 +1733,11 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
         //     evacuation: bool,
         //     fyi: Option<String>,
         //     ht3d: bool,
-        id: namelist.parameters.get("ID").cloned().map(|x| x.try_into().unwrap()),
+        id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
 
         //     matl_id: Option<String>,
         //     mesh_id: Option<String>,
@@ -1734,52 +1749,66 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
         //     prop_id: Option<String>,
         //     removable: bool,
         //     rgb: Option<RGB>,
-        surf_id: namelist.parameters.get("SURF_ID").cloned().map(|x| x.try_into().unwrap()),
-        surf_id6: namelist.parameters.get("SURF_ID6").map(|pv|
-            match pv {
-                ParameterValue::Atom(s) => panic!("expected array"),
-                ParameterValue::Array(vmap) => {
-                    match vmap.len() {
-                        6 => {
-                            (
-                                ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone()).try_into().unwrap(),
-                                ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone()).try_into().unwrap(),
-                                ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone()).try_into().unwrap(),
-                                ParameterValue::Atom(vmap.get(&vec![4]).unwrap().clone()).try_into().unwrap(),
-                                ParameterValue::Atom(vmap.get(&vec![5]).unwrap().clone()).try_into().unwrap(),
-                                ParameterValue::Atom(vmap.get(&vec![6]).unwrap().clone()).try_into().unwrap(),
-                            )
-                        }
-                        l => panic!("expected array of lengh 6, not {}", l),
-                    }
-                },
-            }
-        ),
-        surf_ids: namelist.parameters.get("SURF_IDS").map(|pv|
-                match pv {
-                    ParameterValue::Atom(s) => panic!("expected array"),
-                    ParameterValue::Array(vmap) => {
-                        match vmap.len() {
-                            3 => {
-                                (
-                                    ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone()).try_into().unwrap(),
-                                    ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone()).try_into().unwrap(),
-                                    ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone()).try_into().unwrap(),
-                                )
-                            }
-                            l => panic!("expected array of lengh 3, not {}", l),
-                        }
-                    },
-                }
-            ),
+        surf_id: namelist
+            .parameters
+            .get("SURF_ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        surf_id6: namelist.parameters.get("SURF_ID6").map(|pv| match pv {
+            ParameterValue::Atom(s) => panic!("expected array"),
+            ParameterValue::Array(vmap) => match vmap.len() {
+                6 => (
+                    ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![4]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![5]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![6]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                ),
+                l => panic!("expected array of lengh 6, not {}", l),
+            },
+        }),
+        surf_ids: namelist.parameters.get("SURF_IDS").map(|pv| match pv {
+            ParameterValue::Atom(s) => panic!("expected array"),
+            ParameterValue::Array(vmap) => match vmap.len() {
+                3 => (
+                    ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                    ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
+                        .try_into()
+                        .unwrap(),
+                ),
+                l => panic!("expected array of lengh 3, not {}", l),
+            },
+        }),
         //     texture_origin: XYZ,
         //     thicken: bool,
         //     transparency: f64,
-        xb: namelist.parameters.get("XB").cloned().map(|x| x.try_into().unwrap()).unwrap(),
+        xb: namelist
+            .parameters
+            .get("XB")
+            .cloned()
+            .map(|x| x.try_into().unwrap())
+            .unwrap(),
     };
     fds_file.obsts.push(obst);
 }
-
 
 fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
     let vent = Vent {
@@ -1793,7 +1822,11 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
         //     evacuation: bool,
         //     fyi: Option<String>,
         //     ht3d: bool,
-        id: namelist.parameters.get("ID").cloned().map(|x| x.try_into().unwrap()),
+        id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
         //     matl_id: Option<String>,
         //     mesh_id: Option<String>,
         //     mult_id: Option<String>,
@@ -1804,37 +1837,81 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
         //     prop_id: Option<String>,
         //     removable: bool,
         //     rgb: Option<RGB>,
-        surf_id: namelist.parameters.get("SURF_ID").cloned().map(|x| x.try_into().unwrap()),
+        surf_id: namelist
+            .parameters
+            .get("SURF_ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
         //     texture_origin: XYZ,
         //     thicken: bool,
         //     transparency: f64,
-        xb: namelist.parameters.get("XB").cloned().map(|x| x.try_into().unwrap()),
+        xb: namelist
+            .parameters
+            .get("XB")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
     };
     fds_file.vents.push(vent);
 }
 
 fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
     let devc = Devc {
-        prop_id: namelist.parameters.get("ID").cloned().map(|x| x.try_into().unwrap()),
-        xyz: namelist.parameters.get("XYZ").cloned().map(|x| x.try_into().unwrap()),
+        prop_id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        xyz: namelist
+            .parameters
+            .get("XYZ")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
     };
     fds_file.devcs.push(devc);
 }
 
-
 fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
     let surf = Surf {
-        adiabatic: namelist.parameters.get("ADIABATIC").cloned().map(|x| x.try_into().unwrap()).unwrap_or(false),
-        auto_ignition_temperature: namelist.parameters.get("AUTO_IGNITION_TEMPERATURE").cloned().map(|x| x.try_into().unwrap()).unwrap_or(-273_f64),
-        color: namelist.parameters.get("COLOR").cloned().map(|x| x.try_into().unwrap()),
-        fyi: namelist.parameters.get("FYI").cloned().map(|x| x.try_into().unwrap()),
-        hrrpua: namelist.parameters.get("HRRPUA").cloned().map(|x| x.try_into().unwrap()),
-        id: namelist.parameters.get("ID").cloned().map(|x| x.try_into().unwrap()),
-        mlrpua:namelist.parameters.get("MLRPUA").cloned().map(|x| x.try_into().unwrap()),
+        adiabatic: namelist
+            .parameters
+            .get("ADIABATIC")
+            .cloned()
+            .map(|x| x.try_into().unwrap())
+            .unwrap_or(false),
+        auto_ignition_temperature: namelist
+            .parameters
+            .get("AUTO_IGNITION_TEMPERATURE")
+            .cloned()
+            .map(|x| x.try_into().unwrap())
+            .unwrap_or(-273_f64),
+        color: namelist
+            .parameters
+            .get("COLOR")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        fyi: namelist
+            .parameters
+            .get("FYI")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        hrrpua: namelist
+            .parameters
+            .get("HRRPUA")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        mlrpua: namelist
+            .parameters
+            .get("MLRPUA")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
     };
     fds_file.surfs.push(surf);
 }
-
 
 // decodeVent : FDSFile -> Namelist -> FDSFile
 // decodeVent fdsData nml =
@@ -1993,9 +2070,23 @@ fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
 
 fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
     let mesh = Mesh {
-        id: namelist.parameters.get("ID").cloned().map(|x| x.try_into().unwrap()),
-        ijk: namelist.parameters.get("IJK").cloned().map(|x| x.try_into().unwrap()).unwrap(),
-        xb: namelist.parameters.get("XB").cloned().map(|x| x.try_into().unwrap()).unwrap(),
+        id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().unwrap()),
+        ijk: namelist
+            .parameters
+            .get("IJK")
+            .cloned()
+            .map(|x| x.try_into().unwrap())
+            .unwrap(),
+        xb: namelist
+            .parameters
+            .get("XB")
+            .cloned()
+            .map(|x| x.try_into().unwrap())
+            .unwrap(),
     };
     fds_file.meshes.push(mesh);
 }

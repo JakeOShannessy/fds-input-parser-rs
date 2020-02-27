@@ -1,5 +1,5 @@
-use crate::{FDSFile};
 use crate::decode::*;
+use crate::FDSFile;
 // TODO: everything here assumes XBs are sorted, make this true.
 
 /// A trait for objects that MUST have an XB (for example: meshes, which are
@@ -18,7 +18,6 @@ pub trait MightHaveXB {
 }
 
 impl<T: HasXB> MightHaveXB for T {
-
     /// Return the XB value if it has one.
     fn try_xb(&self) -> Option<XB> {
         Some(self.xb())
