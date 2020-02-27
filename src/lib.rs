@@ -1,5 +1,4 @@
 pub mod decode;
-mod spec;
 pub use decode::{decode_fds_file, FDSFile};
 use namelist::Namelist;
 use std::io::Read;
