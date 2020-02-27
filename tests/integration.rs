@@ -3,27 +3,27 @@ mod integration {
     use fds_input_parser::*;
     #[test]
     fn parse_file_room_fire() {
-        let nml = parse_fds_input(include_bytes!("room_fire.fds"));
+        let nml = parse_fds_input(include_str!("room_fire.fds"));
         println!("nml: {:?}", nml);
     }
 
     #[test]
     fn parse_file_test_a() {
-        let _nml = parse_fds_input(include_bytes!("TestA.fds"));
+        let _nml = parse_fds_input(include_str!("TestA.fds"));
     }
 
     #[test]
     fn parse_file_test_b() {
-        let nml = parse_fds_input(include_bytes!("TestB.fds"));
+        let nml = parse_fds_input(include_str!("TestB.fds"));
         // for (i, namelist) in nml.namelists.iter().enumerate() {
         //     println!("{}: {:?}", i, namelist);
         // }
-        assert_eq!(nml.namelists.len(), 18);
+        assert_eq!(nml.len(), 18);
     }
 
     #[test]
     fn float_error_test() {
-        let string = b"&SURF THICKNESS = 0.005 EXTERNAL_FLUX = 50.0 /";
+        let string = "&SURF THICKNESS = 0.005 EXTERNAL_FLUX = 50.0 /";
         parse_fds_input(string);
     }
 
@@ -39,18 +39,18 @@ mod integration {
                     let example_path = example.unwrap().path();
                     if example_path.is_file() {
                         let mut f = std::fs::File::open(&example_path).unwrap();
-                        let mut buf = Vec::new();
-                        let _n_bytes = f.read_to_end(&mut buf);
+                        let mut buf = String::new();
+                        let _n_bytes = f.read_to_string(&mut buf);
                         println!("Parsing: {:?}", example_path);
                         parse_fds_input(&buf);
                     }
                 }
             }
         }
-        let nml = parse_fds_input(include_bytes!("TestB.fds"));
+        let nml = parse_fds_input(include_str!("TestB.fds"));
         // for (i, namelist) in nml.namelists.iter().enumerate() {
         //     println!("{}: {:?}", i, namelist);
         // }
-        assert_eq!(nml.namelists.len(), 18);
+        assert_eq!(nml.len(), 18);
     }
 }
