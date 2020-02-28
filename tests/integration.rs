@@ -27,6 +27,17 @@ mod integration {
     }
 
     #[test]
+    fn parse_file_test_c() {
+        let input = include_str!("TestC.fds");
+        let parser = namelist::NmlParser::new(std::io::Cursor::new(input));
+        let mut fds_file = FDSFile::new();
+        for nml in parser {
+            fds_file.decode_namelist(&nml);
+        }
+    }
+
+
+    #[test]
     fn float_error_test() {
         let string = "&SURF THICKNESS = 0.005 EXTERNAL_FLUX = 50.0 /";
         parse_fds_input(string);

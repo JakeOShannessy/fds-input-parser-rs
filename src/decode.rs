@@ -1618,24 +1618,24 @@ impl TryFrom<ParameterValue> for XB {
                 6 => Ok(XB {
                     x1: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("x1 failed"),
                     x2: ParameterValue::Atom(vmap.get(&vec![2]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("x2 failed"),
                     y1: ParameterValue::Atom(vmap.get(&vec![3]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("y1 failed"),
                     y2: ParameterValue::Atom(vmap.get(&vec![4]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("y2 failed"),
                     z1: ParameterValue::Atom(vmap.get(&vec![5]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("z1 failed"),
                     z2: ParameterValue::Atom(vmap.get(&vec![6]).unwrap().clone())
                         .try_into()
-                        .unwrap(),
+                        .expect("z2 failed"),
                 }),
-                l => panic!("expected array of lengh 3, not {}", l),
+                l => panic!("failed to parse XB: expected array of length 6, not {}", l),
             },
         }
     }
@@ -1737,7 +1737,7 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("obst.id")),
 
         //     matl_id: Option<String>,
         //     mesh_id: Option<String>,
@@ -1753,7 +1753,7 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("SURF_ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("surf_id failed")),
         surf_id6: namelist.parameters.get("SURF_ID6").map(|pv| match pv {
             ParameterValue::Atom(s) => panic!("expected array"),
             ParameterValue::Array(vmap) => match vmap.len() {
@@ -1804,7 +1804,7 @@ fn decode_obst(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("XB")
             .cloned()
-            .map(|x| x.try_into().unwrap())
+            .map(|x| x.try_into().expect("obst.xb"))
             .unwrap(),
     };
     fds_file.obsts.push(obst);
@@ -1826,7 +1826,7 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("vent.id")),
         //     matl_id: Option<String>,
         //     mesh_id: Option<String>,
         //     mult_id: Option<String>,
@@ -1841,7 +1841,7 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("SURF_ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("devc.surf_id")),
         //     texture_origin: XYZ,
         //     thicken: bool,
         //     transparency: f64,
@@ -1849,7 +1849,7 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("XB")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("devc.xb")),
     };
     fds_file.vents.push(vent);
 }
@@ -1860,12 +1860,12 @@ fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("devc.id")),
         xyz: namelist
             .parameters
             .get("XYZ")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("devc.xyz")),
     };
     fds_file.devcs.push(devc);
 }
@@ -1876,39 +1876,39 @@ fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("ADIABATIC")
             .cloned()
-            .map(|x| x.try_into().unwrap())
+            .map(|x| x.try_into().expect("adiabatic"))
             .unwrap_or(false),
         auto_ignition_temperature: namelist
             .parameters
             .get("AUTO_IGNITION_TEMPERATURE")
             .cloned()
-            .map(|x| x.try_into().unwrap())
+            .map(|x| x.try_into().expect("auto_ignition_tmperature"))
             .unwrap_or(-273_f64),
         color: namelist
             .parameters
             .get("COLOR")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("color:")),
         fyi: namelist
             .parameters
             .get("FYI")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("fyi")),
         hrrpua: namelist
             .parameters
             .get("HRRPUA")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("hrrpua")),
         id: namelist
             .parameters
             .get("ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("id")),
         mlrpua: namelist
             .parameters
             .get("MLRPUA")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("mlrpua")),
     };
     fds_file.surfs.push(surf);
 }
@@ -2074,18 +2074,18 @@ fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
             .parameters
             .get("ID")
             .cloned()
-            .map(|x| x.try_into().unwrap()),
+            .map(|x| x.try_into().expect("mesh.id")),
         ijk: namelist
             .parameters
             .get("IJK")
             .cloned()
-            .map(|x| x.try_into().unwrap())
+            .map(|x| x.try_into().expect("mesh.ijk"))
             .unwrap(),
         xb: namelist
             .parameters
             .get("XB")
             .cloned()
-            .map(|x| x.try_into().unwrap())
+            .map(|x| x.try_into().expect("mesh.xb"))
             .unwrap(),
     };
     fds_file.meshes.push(mesh);
