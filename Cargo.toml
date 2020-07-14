@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 namelist = {git = "https://github.com/JakeOShannessy/namelist-rs.git"}
+# namelist = {path = "../namelist-rs"}

@@ -977,50 +977,50 @@ pub struct RampEntry {
 
 #[derive(Clone, Debug)]
 pub struct Reac {
-    pub a: Option<f64>,
+    // pub a: Option<f64>,
     // , ALT_REAC_ID : String
-    pub auto_ignition_temperature: f64,
-    pub c: f64,
-    pub check_atom_balance: bool,
-    pub co_yield: f64,
-    pub critical_flame_temperature: f64,
-    pub e: f64,
-    pub epumo2: f64,
+    // pub auto_ignition_temperature: f64,
+    // pub c: f64,
+    // pub check_atom_balance: bool,
+    pub co_yield: Option<f64>,
+    // pub critical_flame_temperature: f64,
+    // pub e: f64,
+    // pub epumo2: f64,
     // , K : String
-    pub equation: String,
-    pub fixed_mix_time: f64,
+    // pub equation: String,
+    // pub fixed_mix_time: f64,
     // , FLAME_SPEED : String
     // , FLAME_SPEED_EXPONENT : String
     // , FLAME_SPEED_TEMPERATURE : String
-    pub formula: String,
-    pub fuel: String,
-    pub fuel_radcal_id: String,
+    // pub formula: String,
+    // pub fuel: String,
+    // pub fuel_radcal_id: String,
     // , FWD_ID : String
-    pub fyi: Option<String>,
-    pub h: f64,
-    pub heat_of_combustion: f64,
-    pub id: Option<String>,
-    pub ideal: bool,
-    pub n: f64,
-    pub nu: Vec<f64>,
-    pub n_s: Vec<f64>,
-    pub n_t: f64,
-    pub o: f64,
+    // pub fyi: Option<String>,
+    // pub h: f64,
+    // pub heat_of_combustion: f64,
+    // pub id: Option<String>,
+    // pub ideal: bool,
+    // pub n: f64,
+    // pub nu: Vec<f64>,
+    // pub n_s: Vec<f64>,
+    // pub n_t: f64,
+    // pub o: f64,
     // , ODE_SOLVER : String
-    pub radiative_fraction: f64,
-    pub ramp_chi_r: String,
+    // pub radiative_fraction: f64,
+    // pub ramp_chi_r: String,
     // , RAMP_FS : String
-    pub reac_atom_error: f64,
-    pub reac_mass_error: f64,
+    // pub reac_atom_error: f64,
+    // pub reac_mass_error: f64,
     // , REVERSE : String
-    pub soot_h_fraction: f64,
-    pub soot_yield: f64,
-    pub spec_id_n_s: Vec<String>,
-    pub spec_id_nu: Vec<String>,
+    // pub soot_h_fraction: f64,
+    pub soot_yield: Option<f64>,
+    // pub spec_id_n_s: Vec<String>,
+    // pub spec_id_nu: Vec<String>,
     // , TABLE_FS : String
     // , TAU_CHEM : String
     // , TAU_FLAME : String
-    pub third_body: bool,
+    // pub third_body: bool,
     // , TURBULENT_FLAME_SPEED_ALPHA : String
     // , TURBULENT_FLAME_SPEED_EXPONENT : String
     // , Y_P_MIN_EDC : String
@@ -1708,7 +1708,7 @@ fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
         "SURF" => decode_surf(fds_file, namelist),
         "MESH" => decode_mesh(fds_file, namelist),
         // "SLCF" => decode_slcf(fds_file, namelist),
-        // "REAC" => decode_reac(fds_file, namelist),
+        "REAC" => decode_reac(fds_file, namelist),
         // "HVAC" => decode_hvac(fds_file, namelist),
         // "DUMP" => decode_dump(fds_file, namelist),
         // "MISC" => decode_misc(fds_file, namelist),
@@ -2457,59 +2457,53 @@ fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
 //             }
 //     in fdsData { Hvacs = hvac:(Hvacs fdsData)}
 
-// decodeReac : FDSFile -> Namelist -> FDSFile
-// decodeReac fdsData nml =
-//     let
-//         reac = Reac
-//             { A = parToDouble <$> getParameterMaybe nml "A"
-//             // -- , ALT_REAC_ID : String
-//             // , AUTO_IGNITION_TEMPERATURE : f64
-//             , C = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "C"
-//             // , CHECK_ATOM_BALANCE : bool
-//             , CO_YIELD = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "CO_YIELD"
-//             // , CRITICAL_FLAME_TEMPERATURE : f64
-//             // , E : f64
-//             , EPUMO2 = fromMaybe 13100 $ parToDouble <$> getParameterMaybe nml "EPUMO2"
-//             // -- , K : String
-//             // , EQUATION : String
-//             // , FIXED_MIX_TIME : f64
-//             // -- , FLAME_SPEED : String
-//             // -- , FLAME_SPEED_EXPONENT : String
-//             // -- , FLAME_SPEED_TEMPERATURE : String
-//             // , FORMULA : String
-//             // , FUEL : String
-//             // , FUEL_RADCAL_ID : String
-//             // -- , FWD_ID : String
-//             , FYI = parToString <$> getParameterMaybe nml "FYI"
-//             , H = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "H"
-//             // , HEAT_OF_COMBUSTION : f64
-//             , ID = parToString <$> getParameterMaybe nml "ID"
-//             // , IDEAL : bool
-//             , N = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "N"
-//             // , NU : Vec<f64>
-//             // , N_S : Vec<f64>
-//             // , N_T : f64
-//             , O = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "O"
-//             // -- , ODE_SOLVER : String
-//             // , RADIATIVE_FRACTION : f64
-//             // , RAMP_CHI_R : String
-//             // -- , RAMP_FS : String
-//             // , REAC_ATOM_ERROR : f64
-//             // , REAC_MASS_ERROR : f64
-//             // -- , REVERSE : String
-//             , SOOT_H_FRACTION = fromMaybe 0.1 $ parToDouble <$> getParameterMaybe nml "SOOT_H_FRACTION"
-//             , SOOT_YIELD = fromMaybe 0 $ parToDouble <$> getParameterMaybe nml "SOOT_YIELD"
-//             // , SPEC_ID_N_S : Vec<String>
-//             // , SPEC_ID_NU : Vec<String>
-//             // -- , TABLE_FS : String
-//             // -- , TAU_CHEM : String
-//             // -- , TAU_FLAME : String
-//             // , THIRD_BODY : bool
-//             // -- , TURBULENT_FLAME_SPEED_ALPHA : String
-//             // -- , TURBULENT_FLAME_SPEED_EXPONENT : String
-//             // -- , Y_P_MIN_EDC : String
-//             }
-//     in fdsData { Reacs = reac:(Reacs fdsData)}
+
+fn decode_reac(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let reac = Reac {
+        // adiabatic: namelist
+        //     .parameters
+        //     .get("ADIABATIC")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("adiabatic"))
+        //     .unwrap_or(false),
+        soot_yield: namelist
+            .parameters
+            .get("SOOT_YIELD")
+            .cloned()
+            .map(|x| x.try_into().expect("soot_yield")),
+        co_yield: namelist
+            .parameters
+            .get("CO_YIELD")
+            .cloned()
+            .map(|x| x.try_into().expect("co_yield")),
+        // color: namelist
+        //     .parameters
+        //     .get("COLOR")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("color:")),
+        // fyi: namelist
+        //     .parameters
+        //     .get("FYI")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("fyi")),
+        // hrrpua: namelist
+        //     .parameters
+        //     .get("HRRPUA")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("hrrpua")),
+        // id: namelist
+        //     .parameters
+        //     .get("ID")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("id")),
+        // mlrpua: namelist
+        //     .parameters
+        //     .get("MLRPUA")
+        //     .cloned()
+        //     .map(|x| x.try_into().expect("mlrpua")),
+    };
+    fds_file.reacs.push(reac);
+}
 
 // decodeMisc : FDSFile -> Namelist -> FDSFile
 // decodeMisc fdsData nml =
