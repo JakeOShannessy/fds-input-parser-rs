@@ -757,6 +757,26 @@ impl Obst {
         let xb = Some(self.xb)?;
         Some((xb.x2 - xb.x1) * (xb.y2 - xb.y1))
     }
+
+    pub fn is_burner(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids.iter().map(|surf_id| fds_data.surfs.iter().find(|surf| surf.id.as_ref() == Some(surf_id))).collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_burner() {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+}
+
+impl HasXB for Obst {
+    fn xb(&self) -> XB {
+        self.xb
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -1230,6 +1250,13 @@ pub struct Surf {
     // , VOLUME_FLUX : String
 }
 
+impl Surf {
+    /// A SURF is a burner surface if it has either MLRPUA or HRRPUA set.
+    pub fn is_burner(&self) -> bool {
+        self.mlrpua.is_some() || self.hrrpua.is_some()
+    }
+}
+
 impl Default for Surf {
     fn default() -> Self {
         Surf {
@@ -1519,6 +1546,19 @@ impl Vent {
         } else {
             None
         }
+    }
+
+    pub fn is_burner(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids.iter().map(|surf_id| fds_data.surfs.iter().find(|surf| surf.id.as_ref() == Some(surf_id))).collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_burner() {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
