@@ -1,4 +1,4 @@
-use crate::xb::HasXB;
+use crate::xb::{HasXB, MightHaveXB};
 ///! This module defines data structures for FDS input data, and the functions
 ///! for converting them to and from Fortran Namelists. This is inherently less
 ///! flexible than the Namelist data, which can hold any data, but allows us to
@@ -187,7 +187,7 @@ pub struct Devc {
     // flowrate: f64,
     // fyi: Option<String>,
     // hide_coordinates: bool,
-    // id: Option<String>,
+    pub id: Option<String>,
     // initial_state: bool,
     // init_id: Option<String>,
     // ior: Option<i64>,
@@ -235,6 +235,7 @@ impl Devc {
             Some(x) => x,
             None => return false,
         };
+        println!("devc has prop {:?}", self.prop_id);
         // Get the prop.
         for prop in &fds_file.props {
             if prop.id.as_ref() == Some(prop_id) {
@@ -815,6 +816,48 @@ impl Obst {
         }
         false
     }
+
+    pub fn is_extract(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_extract() {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub fn is_supply(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_supply() {
+                    return true;
+                }
+            }
+        }
+        false
+    }
 }
 
 impl HasXB for Obst {
@@ -933,8 +976,8 @@ pub struct Prof {
 
 #[derive(Clone, Debug)]
 pub struct Prop {
-    pub activation_obscuration: f64,
-    pub activation_temperature: f64,
+    pub activation_obscuration: Option<f64>,
+    pub activation_temperature: Option<f64>,
     // alpha_c: f64,
     // alpha_e: f64,
     // bead_density: f64,
@@ -952,7 +995,7 @@ pub struct Prop {
     // droplet_velocity: f64,
     // emissivity: f64,
     // flow_ramp: String,
-    pub flow_rate: f64,
+    pub flow_rate: Option<f64>,
     // flow_tau: f64,
     // fyi: Option<String>,
     // gauge_emissivity: f64,
@@ -969,7 +1012,7 @@ pub struct Prop {
     // p0: String,
     // particles_per_second: i64,
     // particle_velocity: f64,
-    pub part_id: String,
+    pub part_id: Option<String>,
     // pdpa_end: f64,
     // pdpa_histogram: bool,
     // pdpa_histogram_limits: Vec<f64>,
@@ -984,7 +1027,7 @@ pub struct Prop {
     // pressure_ramp: String, // , PX : String
     // // , PXX : String
     pub quantity: Option<String>,
-    pub rti: f64,
+    pub rti: Option<f64>,
     // smokeview_id: Vec<String>,
     // smokeview_parameters: Vec<String>,
     // spec_id: String,
@@ -1245,7 +1288,7 @@ pub struct Surf {
     // tau_ef: f64,
     // tau_mf: f64,
     // tau_part: f64,
-    // tau_q: f64,
+    pub tau_q: Option<f64>,
     // tau_t: f64,
     // tau_v: f64,
     // texture_height: f64,
@@ -1304,6 +1347,20 @@ impl Surf {
     /// A SURF is a burner surface if it has either MLRPUA or HRRPUA set.
     pub fn is_burner(&self) -> bool {
         self.mlrpua.is_some() || self.hrrpua.is_some()
+    }
+    /// A SURF is an extract surface if either VEL or VOLUME_FLOW is set and is positive
+    /// AND it is not a burner.
+    pub fn is_extract(&self) -> bool {
+        (self.vel.map(|v| v > 0.0).unwrap_or(false)
+            || self.volume_flow.map(|v| v > 0.0).unwrap_or(false))
+            && !self.is_burner()
+    }
+    /// A SURF is a supply surface if either VEL or VOLUME_FLOW is set and is negative
+    /// AND it is not a burner.
+    pub fn is_supply(&self) -> bool {
+        (self.vel.map(|v| v < 0.0).unwrap_or(false)
+            || self.volume_flow.map(|v| v < 0.0).unwrap_or(false))
+            && !self.is_burner()
     }
 }
 
@@ -1386,7 +1443,7 @@ impl Default for Surf {
             // tau_ef: 1_f64,
             // tau_mf: 1_f64,
             // tau_part: 1_f64,
-            // tau_q: 1_f64,
+            tau_q: None,
             // tau_t: 1_f64,
             // tau_v: 1_f64,
             // texture_height: 1_f64,
@@ -1637,6 +1694,66 @@ impl Vent {
         }
         false
     }
+
+    pub fn is_extract(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_extract() {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub fn is_supply(&self, fds_data: &FDSFile) -> bool {
+        let surf_ids = self.surf_ids();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
+        for surf in surfaces {
+            if let Some(surf) = surf {
+                if surf.is_supply() {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+}
+
+impl MightHaveXB for Vent {
+    fn try_xb(&self) -> Option<XB> {
+        self.xb.clone()
+    }
+}
+
+impl MightHaveXB for &Vent {
+    fn try_xb(&self) -> Option<XB> {
+        self.xb.clone()
+    }
+}
+
+impl MightHaveXB for &mut Vent {
+    fn try_xb(&self) -> Option<XB> {
+        self.xb.clone()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -1673,12 +1790,38 @@ pub struct IJK {
     pub k: i64,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum FromParameterValueError {
+    ExpectedArray,
+    IncorrectArrayLength { expected: usize, found: usize },
+}
+
+impl std::fmt::Display for FromParameterValueError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            Self::ExpectedArray => write!(f, "Expected an array, but found an atom"),
+            Self::IncorrectArrayLength { expected, found } => {
+                write!(f, "Expected array length of {} found {}", found, expected)
+            }
+        }
+    }
+}
+
+impl std::error::Error for FromParameterValueError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::ExpectedArray => None,
+            Self::IncorrectArrayLength { .. } => None,
+        }
+    }
+}
+
 impl TryFrom<ParameterValue> for IJK {
-    type Error = ();
+    type Error = FromParameterValueError;
 
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
-            ParameterValue::Atom(s) => panic!("expected array"),
+            ParameterValue::Atom(_) => Err(FromParameterValueError::ExpectedArray),
             ParameterValue::Array(vmap) => match vmap.len() {
                 3 => Ok(IJK {
                     i: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
@@ -1691,7 +1834,10 @@ impl TryFrom<ParameterValue> for IJK {
                         .try_into()
                         .unwrap(),
                 }),
-                l => panic!("expected array of lengh 3, not {}", l),
+                l => Err(FromParameterValueError::IncorrectArrayLength {
+                    expected: 3,
+                    found: l,
+                }),
             },
         }
     }
@@ -1726,11 +1872,11 @@ impl XB {
 }
 
 impl TryFrom<ParameterValue> for XB {
-    type Error = ();
+    type Error = FromParameterValueError;
 
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
-            ParameterValue::Atom(s) => panic!("expected array"),
+            ParameterValue::Atom(_) => Err(FromParameterValueError::ExpectedArray),
             ParameterValue::Array(vmap) => match vmap.len() {
                 6 => Ok(XB {
                     x1: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
@@ -1752,7 +1898,10 @@ impl TryFrom<ParameterValue> for XB {
                         .try_into()
                         .expect("z2 failed"),
                 }),
-                l => panic!("failed to parse XB: expected array of length 6, not {}", l),
+                l => Err(FromParameterValueError::IncorrectArrayLength {
+                    expected: 6,
+                    found: l,
+                }),
             },
         }
     }
@@ -1766,11 +1915,11 @@ pub struct XYZ {
 }
 
 impl TryFrom<ParameterValue> for XYZ {
-    type Error = ();
+    type Error = FromParameterValueError;
 
     fn try_from(pv: ParameterValue) -> Result<Self, Self::Error> {
         match pv {
-            ParameterValue::Atom(s) => panic!("expected array"),
+            ParameterValue::Atom(_) => Err(FromParameterValueError::ExpectedArray),
             ParameterValue::Array(vmap) => match vmap.len() {
                 3 => Ok(XYZ {
                     x: ParameterValue::Atom(vmap.get(&vec![1]).unwrap().clone())
@@ -1783,7 +1932,10 @@ impl TryFrom<ParameterValue> for XYZ {
                         .try_into()
                         .unwrap(),
                 }),
-                l => panic!("expected array of lengh 3, not {}", l),
+                l => Err(FromParameterValueError::IncorrectArrayLength {
+                    expected: 3,
+                    found: l,
+                }),
             },
         }
     }
@@ -1818,10 +1970,10 @@ fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
     match namelist.name.as_ref() {
         "OBST" => decode_obst(fds_file, namelist),
         "VENT" => decode_vent(fds_file, namelist),
-        // "DEVC" => decode_devc(fds_file, namelist),
+        "DEVC" => decode_devc(fds_file, namelist),
         // "PART" => decode_part(fds_file, namelist),
         "TIME" => decode_time(fds_file, namelist),
-        // "PROP" => decode_prop(fds_file, namelist),
+        "PROP" => decode_prop(fds_file, namelist),
         "SURF" => decode_surf(fds_file, namelist),
         "MESH" => decode_mesh(fds_file, namelist),
         // "SLCF" => decode_slcf(fds_file, namelist),
@@ -1973,11 +2125,16 @@ fn decode_vent(fds_file: &mut FDSFile, namelist: &Namelist) {
 
 fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
     let devc = Devc {
-        prop_id: namelist
+        id: namelist
             .parameters
             .get("ID")
             .cloned()
             .map(|x| x.try_into().expect("devc.id")),
+        prop_id: namelist
+            .parameters
+            .get("PROP_ID")
+            .cloned()
+            .map(|x| x.try_into().expect("devc.prop_id")),
         xyz: namelist
             .parameters
             .get("XYZ")
@@ -1985,6 +2142,47 @@ fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
             .map(|x| x.try_into().expect("devc.xyz")),
     };
     fds_file.devcs.push(devc);
+}
+
+fn decode_prop(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let prop = Prop {
+        id: namelist
+            .parameters
+            .get("ID")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.id")),
+        activation_obscuration: namelist
+            .parameters
+            .get("ACTIVATION_OBSCURATION")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.activation_obscuration")),
+        activation_temperature: namelist
+            .parameters
+            .get("ACTIVATION_TEMPERATURE")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.activation_obscuration")),
+        flow_rate: namelist
+            .parameters
+            .get("FLOW_RATE")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.activation_obscuration")),
+        part_id: namelist
+            .parameters
+            .get("PART_ID")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.part_id")),
+        quantity: namelist
+            .parameters
+            .get("QUANTITY")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.quantity")),
+        rti: namelist
+            .parameters
+            .get("RTI")
+            .cloned()
+            .map(|x| x.try_into().expect("prop.rti")),
+    };
+    fds_file.props.push(prop);
 }
 
 fn decode_head(fds_file: &mut FDSFile, namelist: &Namelist) {
@@ -2007,7 +2205,6 @@ fn decode_head(fds_file: &mut FDSFile, namelist: &Namelist) {
     };
     fds_file.head = Some(head);
 }
-
 
 fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
     let surf = Surf {
@@ -2058,6 +2255,11 @@ fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
             .get("VOLUME_FLOW")
             .cloned()
             .map(|x| x.try_into().expect("volume_flow")),
+        tau_q: namelist
+            .parameters
+            .get("TAU_Q")
+            .cloned()
+            .map(|x| x.try_into().expect("tau_q")),
     };
     fds_file.surfs.push(surf);
 }

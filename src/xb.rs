@@ -1,20 +1,23 @@
 use crate::decode::*;
-use crate::FDSFile;
 // TODO: everything here assumes XBs are sorted, make this true.
 
 /// A trait for objects that MUST have an XB (for example: meshes, which are
 /// given a default XB if it's not specified).
 pub trait HasXB {
     fn xb(&self) -> XB;
-    /// Test two Objects with XBs and determine if they intersect in 3d.
-    fn intersect<Q: HasXB>(&self, b: &Q) -> bool {
-        self.xb().intersect(&b.xb())
-    }
+    // / Test two Objects with XBs and determine if they intersect in 3d.
+    // fn intersect<Q: HasXB>(&self, b: &Q) -> bool {
+    //     self.xb().intersect(&b.xb())
+    // }
 }
 
 pub trait MightHaveXB {
     fn try_xb(&self) -> Option<XB>;
-    fn intersect<Q: MightHaveXB>(&self, b: &Q) -> bool;
+    fn intersect<Q: MightHaveXB>(&self, b: &Q) -> bool {
+        let a_xb = if let Some(xb) = self.try_xb() {xb} else {return  false;};
+        let b_xb = if let Some(xb) = b.try_xb() {xb} else {return  false;};
+        a_xb.intersect(&b_xb)
+    }
 }
 
 impl<T: HasXB> MightHaveXB for T {
