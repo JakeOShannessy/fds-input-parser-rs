@@ -1,5 +1,4 @@
 use crate::xb::HasXB;
-use crate::xb::*;
 ///! This module defines data structures for FDS input data, and the functions
 ///! for converting them to and from Fortran Namelists. This is inherently less
 ///! flexible than the Namelist data, which can hold any data, but allows us to
@@ -105,9 +104,9 @@ impl Default for FDSFile {
 
 #[derive(Clone, Debug)]
 pub struct Head {
-    chid: Option<String>,
-    fyi: Option<String>,
-    title: Option<String>,
+    pub chid: Option<String>,
+    pub fyi: Option<String>,
+    pub title: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -228,6 +227,22 @@ pub struct Devc {
     // y_id: Option<String>,
     // z_id: Option<String>,
     // xyz_units: String,
+}
+
+impl Devc {
+    pub fn is_sprinkler(&self, fds_file: &FDSFile) -> bool {
+        let prop_id = match self.prop_id.as_ref() {
+            Some(x) => x,
+            None => return false,
+        };
+        // Get the prop.
+        for prop in &fds_file.props {
+            if prop.id.as_ref() == Some(prop_id) {
+                return prop.is_sprinkler_prop();
+            }
+        }
+        false
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -432,6 +447,28 @@ pub struct Matl {
 //         , pyrolysisReacTGM_HEAT_OF_REACTION : f64 -- ^HEAT_OF_REACTION
 //         }
 //     | NoPyrolysis
+#[derive(Clone, Debug)]
+pub struct Resolution {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
+
+impl Resolution {
+    pub fn volume(&self) -> f64 {
+        self.x * self.y * self.z
+    }
+    pub fn max_side(&self) -> f64 {
+        let mut max = self.x;
+        if self.y > max {
+            max = self.y;
+        }
+        if self.z > max {
+            max = self.z;
+        }
+        max
+    }
+}
 
 // ----------------------------------------
 #[derive(Clone, Debug)]
@@ -453,14 +490,14 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn resolution(&self) -> (f64, f64, f64) {
+    pub fn resolution(&self) -> Resolution {
         let ijk = self.ijk;
         let (dx, dy, dz) = self.dimensions();
-        (
-            dx / (ijk.i as f64),
-            dy / (ijk.j as f64),
-            dz / (ijk.k as f64),
-        )
+        Resolution {
+            x: dx / (ijk.i as f64),
+            y: dy / (ijk.j as f64),
+            z: dz / (ijk.k as f64),
+        }
     }
     pub fn dimensions(&self) -> (f64, f64, f64) {
         let xb = self.xb();
@@ -469,7 +506,7 @@ impl Mesh {
         let dz = xb.z2 - xb.z1;
         (dx, dy, dz)
     }
-    pub fn cells(&self) -> u64 {
+    pub fn n_cells(&self) -> u64 {
         (self.ijk.i * self.ijk.j * self.ijk.k) as u64
     }
 }
@@ -760,7 +797,15 @@ impl Obst {
 
     pub fn is_burner(&self, fds_data: &FDSFile) -> bool {
         let surf_ids = self.surf_ids();
-        let surfaces: Vec<Option<&Surf>> = surf_ids.iter().map(|surf_id| fds_data.surfs.iter().find(|surf| surf.id.as_ref() == Some(surf_id))).collect();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
         for surf in surfaces {
             if let Some(surf) = surf {
                 if surf.is_burner() {
@@ -770,7 +815,6 @@ impl Obst {
         }
         false
     }
-
 }
 
 impl HasXB for Obst {
@@ -914,7 +958,7 @@ pub struct Prop {
     // gauge_emissivity: f64,
     // gauge_temperature: f64,
     // heat_transfer_coefficient: f64,
-    // id: Option<String>,
+    pub id: Option<String>,
     // initial_temperature: f64,
     // k_factor: f64,
     // length: f64,
@@ -950,6 +994,12 @@ pub struct Prop {
     // spray_pattern_shape: String,
     // spray_pattern_table: String,
     // velocity_component: i64, // , DROPLET_VELOCITY : String
+}
+
+impl Prop {
+    pub fn is_sprinkler_prop(&self) -> bool {
+        self.quantity == Some("SPRINKLER LINK TEMPERATURE".to_string())
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -1236,11 +1286,11 @@ pub struct Surf {
     // veg_lset_ellipse: f64,
     // veg_lset_tan2: bool,
     // veg_lset_ellipse_head: f64,
-    // vel: Option<f64>,
+    pub vel: Option<f64>,
     // vel_bulk: f64,
     // vel_grad: f64,
     // vel_t: Option<(f64, f64)>,
-    // volume_flow: Option<f64>,
+    pub volume_flow: Option<f64>,
     // width: f64,
     // xyz: XYZ,
     // z0: f64,
@@ -1377,11 +1427,11 @@ impl Default for Surf {
             // veg_lset_ellipse: None,
             // veg_lset_tan2: None,
             // veg_lset_ellipse_head: None,
-            // vel: None,
+            vel: None,
             // vel_bulk: None,
             // vel_grad: None,
             // vel_t: None,
-            // volume_flow: None,
+            volume_flow: None,
             // width: None,
             // xyz: None,
             // z0: 10_f64,
@@ -1433,20 +1483,39 @@ pub struct Tabl {
 
 #[derive(Clone, Debug)]
 pub struct Time {
-    dt: Option<f64>,
-    evac_dt_flowfield: f64,
-    evac_dt_steady_state: f64,
-    fyi: Option<String>,
-    limiting_dt_ratio: f64,
-    lock_time_step: bool,
-    restrict_time_step: bool,
-    t_begin: f64,
-    t_end: f64,
-    t_end_geom: f64,
-    time_shrink_factor: f64,
-    wall_increment: i64,
-    wall_increment_ht3d: i64,
-    twfin: f64,
+    // pub dt: Option<f64>,
+    // pub evac_dt_flowfield: f64,
+    // pub evac_dt_steady_state: f64,
+    // pub fyi: Option<String>,
+    // pub limiting_dt_ratio: f64,
+    // pub lock_time_step: bool,
+    // pub restrict_time_step: bool,
+    pub t_begin: Option<f64>,
+    pub t_end: Option<f64>,
+    // pub t_end_geom: f64,
+    // pub time_shrink_factor: f64,
+    // pub wall_increment: i64,
+    // pub wall_increment_ht3d: i64,
+    // pub twfin: f64,
+}
+
+fn decode_time(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let time = Time {
+        t_begin: namelist
+            .parameters
+            .get("T_BEGIN")
+            .cloned()
+            .and_then(|x| x.try_into().ok()),
+        t_end: namelist
+            .parameters
+            .get("T_END")
+            .cloned()
+            .and_then(|x| x.try_into().ok()),
+    };
+    if fds_file.time.is_some() {
+        panic!("Multiple TIME namelists")
+    }
+    fds_file.time = Some(time);
 }
 
 #[derive(Clone, Debug)]
@@ -1550,7 +1619,15 @@ impl Vent {
 
     pub fn is_burner(&self, fds_data: &FDSFile) -> bool {
         let surf_ids = self.surf_ids();
-        let surfaces: Vec<Option<&Surf>> = surf_ids.iter().map(|surf_id| fds_data.surfs.iter().find(|surf| surf.id.as_ref() == Some(surf_id))).collect();
+        let surfaces: Vec<Option<&Surf>> = surf_ids
+            .iter()
+            .map(|surf_id| {
+                fds_data
+                    .surfs
+                    .iter()
+                    .find(|surf| surf.id.as_ref() == Some(surf_id))
+            })
+            .collect();
         for surf in surfaces {
             if let Some(surf) = surf {
                 if surf.is_burner() {
@@ -1743,7 +1820,7 @@ fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
         "VENT" => decode_vent(fds_file, namelist),
         // "DEVC" => decode_devc(fds_file, namelist),
         // "PART" => decode_part(fds_file, namelist),
-        // "TIME" => decode_time(fds_file, namelist),
+        "TIME" => decode_time(fds_file, namelist),
         // "PROP" => decode_prop(fds_file, namelist),
         "SURF" => decode_surf(fds_file, namelist),
         "MESH" => decode_mesh(fds_file, namelist),
@@ -1752,7 +1829,7 @@ fn decode_namelist(fds_file: &mut FDSFile, namelist: &Namelist) {
         // "HVAC" => decode_hvac(fds_file, namelist),
         // "DUMP" => decode_dump(fds_file, namelist),
         // "MISC" => decode_misc(fds_file, namelist),
-        // "HEAD" => decode_head(fds_file, namelist),
+        "HEAD" => decode_head(fds_file, namelist),
         _ => decode_unknown(fds_file, namelist),
     }
 }
@@ -1910,6 +1987,28 @@ fn decode_devc(fds_file: &mut FDSFile, namelist: &Namelist) {
     fds_file.devcs.push(devc);
 }
 
+fn decode_head(fds_file: &mut FDSFile, namelist: &Namelist) {
+    let head = Head {
+        chid: namelist
+            .parameters
+            .get("CHID")
+            .cloned()
+            .map(|x| x.try_into().expect("head.chid")),
+        title: namelist
+            .parameters
+            .get("TITLE")
+            .cloned()
+            .and_then(|x| x.try_into().ok()),
+        fyi: namelist
+            .parameters
+            .get("TITLE")
+            .cloned()
+            .and_then(|x| x.try_into().ok()),
+    };
+    fds_file.head = Some(head);
+}
+
+
 fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
     let surf = Surf {
         adiabatic: namelist
@@ -1949,6 +2048,16 @@ fn decode_surf(fds_file: &mut FDSFile, namelist: &Namelist) {
             .get("MLRPUA")
             .cloned()
             .map(|x| x.try_into().expect("mlrpua")),
+        vel: namelist
+            .parameters
+            .get("VEL")
+            .cloned()
+            .map(|x| x.try_into().expect("vel")),
+        volume_flow: namelist
+            .parameters
+            .get("VOLUME_FLOW")
+            .cloned()
+            .map(|x| x.try_into().expect("volume_flow")),
     };
     fds_file.surfs.push(surf);
 }
@@ -2496,7 +2605,6 @@ fn decode_mesh(fds_file: &mut FDSFile, namelist: &Namelist) {
 //             // , XYZ : XYZ
 //             }
 //     in fdsData { Hvacs = hvac:(Hvacs fdsData)}
-
 
 fn decode_reac(fds_file: &mut FDSFile, namelist: &Namelist) {
     let reac = Reac {
